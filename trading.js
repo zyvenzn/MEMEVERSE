@@ -6,7 +6,7 @@
     {symbol:"BNBUSDT",base:"BNB",name:"BNB"}
   ];
   const intervals=["1m","5m","15m","1h","4h","1d"];
-  const state={symbol:"BTCUSDT",interval:"1h",side:"buy",chart:null,candleSeries:null,resize:null,quote:null,quotes:{},timer:null,loading:false};
+  const state={symbol:"BTCUSDT",interval:"1h",side:"buy",chart:null,candleSeries:null,resize:null,quote:null,quotes:{},positions:{},timer:null,loading:false};
   const fmt=(n,d=2)=>Number(n||0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
   const usd=n=>"$"+fmt(n,2);
   const asset=()=>WATCH.find(x=>x.symbol===state.symbol)||WATCH[0];
@@ -78,7 +78,7 @@
   function updateEstimate(){const qty=Number(document.getElementById("trade-quantity")?.value||0),price=state.quotes[state.symbol]?.price||0,notional=qty*price,fee=notional*.001;setText("trade-estimated",usd(notional));setText("trade-fee",usd(fee))}
   async function loadAccount(){
     const c=client(),u=window.MEMEVERSE_USER;if(!c||!u){setText("trade-available","Login required");setText("trade-cash","—");setText("trade-asset-count","—");setText("trade-trade-count","—");const submit=document.getElementById("trade-submit");if(submit){submit.disabled=true;submit.textContent="Connect account to trade"}return}
-    const [{data:wallet,error:walletError},{data:trades,error:tradeError}]=await Promise.all([c.from("wallets").select("balance").eq("user_id",u.id).maybeSingle(),c.from("trading_trades").select("id,symbol,side,quantity,price,notional,fee,created_at").eq("user_id",u.id).order("created_at",{ascending:false}).limit(50)]);
+    const [{data:wallet,error:walletError},{data:trades,error:tradeError}]=await Promise.all([c.from("wallets").select("balance").eq("user_id",u.id).maybeSingle(),c.from("trading_trades").select("id,symbol,side,quantity,price,notional,fee,created_at").eq("user_id",u.id).order("created_at",{ascending:false}).limit(1000)]);
     if(walletError||tradeError){message((walletError||tradeError).message+" — apply the trading database migration first.","error");return}
     const balance=Number(wallet?.balance||0);setText("trade-available",usd(balance)+" USDV");setText("trade-cash",usd(balance)+" USDV");setText("trade-trade-count",String(trades.length));const submit=document.getElementById("trade-submit");if(submit){submit.disabled=false;submit.textContent=state.side==="buy"?"Buy "+asset().base:"Sell "+asset().base}
     const positions={};for(const t of [...trades].reverse()){positions[t.symbol]=(positions[t.symbol]||0)+(t.side==="buy"?1:-1)*Number(t.quantity)}
@@ -103,10 +103,10 @@
     if(state.timer)clearInterval(state.timer);
     state.chart=null;state.candleSeries=null;state.resize?.disconnect();state.resize=null;
     const host=document.getElementById("trade-chart");if(!host)return;
-    document.querySelectorAll("[data-symbol]").forEach(el=>el.addEventListener("click",()=>{state.symbol=el.dataset.symbol;renderSelected();renderMarketList(Object.values(state.quotes))}));
+    const selectSymbol=e=>{const button=e.target.closest("[data-symbol]");if(!button)return;state.symbol=button.dataset.symbol;renderSelected();renderMarketList(Object.values(state.quotes))};\n    document.getElementById("trade-ticker-strip")?.addEventListener("click",selectSymbol);\n    document.getElementById("trade-market-list")?.addEventListener("click",selectSymbol);
     document.querySelectorAll("[data-interval]").forEach(el=>el.addEventListener("click",()=>{state.interval=el.dataset.interval;document.querySelectorAll("[data-interval]").forEach(b=>b.classList.toggle("active",b===el));loadCandles()}));
     document.querySelectorAll("[data-side]").forEach(el=>el.addEventListener("click",()=>{state.side=el.dataset.side;document.querySelectorAll("[data-side]").forEach(b=>b.classList.toggle("active",b===el));const submit=document.getElementById("trade-submit");if(submit)submit.textContent=(state.side==="buy"?"Buy ":"Sell ")+asset().base;updateEstimate()}));
-    document.querySelectorAll("[data-percent]").forEach(el=>el.addEventListener("click",()=>{const pct=Number(el.dataset.percent)/100,price=state.quotes[state.symbol]?.price||0,balance=Number(document.getElementById("trade-available")?.textContent.replace(/[^0-9.]/g,"")||0);if(state.side==="buy"&&price)document.getElementById("trade-quantity").value=(balance*pct/1.001/price).toFixed(8);updateEstimate()}));
+    document.querySelectorAll("[data-percent]").forEach(el=>el.addEventListener("click",()=>{const pct=Number(el.dataset.percent)/100,price=state.quotes[state.symbol]?.price||0,balance=Number(document.getElementById("trade-available")?.textContent.replace(/[^0-9.]/g,"")||0);if(price){const max=state.side==="buy"?(balance/1.001/price):(state.positions[state.symbol]||0);document.getElementById("trade-quantity").value=(max*pct).toFixed(8)}updateEstimate()}));
     document.getElementById("trade-quantity")?.addEventListener("input",updateEstimate);
     document.getElementById("trade-submit")?.addEventListener("click",submitTrade);
     document.getElementById("trade-refresh")?.addEventListener("click",()=>{loadQuotes();loadAccount()});
