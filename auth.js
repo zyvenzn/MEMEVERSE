@@ -9,6 +9,7 @@
   }
 
   const client = window.supabase.createClient(config.url, config.publishableKey);
+  window.MEMEVERSE_CLIENT = client;
   let mode = "signup";
   let busy = false;
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -16,6 +17,8 @@
   }[char]));
 
   function render(user, profile, balance) {
+    window.MEMEVERSE_USER = user || null;
+    window.MEMEVERSE_PROFILE = profile || null;
     if (user) {
       host.innerHTML = `
         <div class="auth-card signed-in">
@@ -87,7 +90,7 @@
 
   async function loadUser(user) {
     const [{ data: profile }, { data: wallet, error: walletError }] = await Promise.all([
-      client.from("profiles").select("handle,display_name").eq("id", user.id).maybeSingle(),
+      client.from("profiles").select("handle,display_name,bio,avatar_url,banner_url").eq("id", user.id).maybeSingle(),
       client.from("wallets").select("balance").eq("user_id", user.id).maybeSingle()
     ]);
     render(user, profile, wallet?.balance ?? 0);
