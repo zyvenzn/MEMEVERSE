@@ -19,6 +19,7 @@
   function render(user, profile, balance) {
     window.MEMEVERSE_USER = user || null;
     window.MEMEVERSE_PROFILE = profile || null;
+    document.dispatchEvent(new Event("memeverse:auth"));
     if (user) {
       host.innerHTML = `
         <div class="auth-card signed-in">
