@@ -87,3 +87,33 @@ body:has(.x-app) #content{width:100%;margin:0}
  .x-mobile-nav button{border:0;background:transparent;color:#e7e9ea;font-size:25px;padding:8px 14px}
  .x-compose-fab{display:grid;place-items:center;position:fixed;z-index:19;right:18px;bottom:calc(76px + env(safe-area-inset-bottom));width:54px;height:54px;border:0;border-radius:50%;background:#1d9bf0;color:white;font-size:31px;box-shadow:0 4px 16px #000}
 }
+
+
+/* Public X profile page inspired by native X mobile profile */
+.x-profile-page{width:100%;max-width:600px;margin:0 auto;min-height:100vh;background:#000;color:#e7e9ea;font-family:Arial,Helvetica,sans-serif}
+.x-profile-cover{height:220px;background:linear-gradient(135deg,#101b32,#243b5b 48%,#111827);background-size:cover;background-position:center;position:relative}
+.x-profile-back{position:absolute;top:16px;left:14px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:white;font-size:30px;line-height:24px}
+.x-cover-actions{position:absolute;right:14px;top:16px;display:flex;gap:12px}
+.x-cover-actions button{width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:22px}
+.x-profile-identity{padding:0 15px 14px;border-bottom:1px solid #2f3336;position:relative}
+.x-profile-avatar{width:100px;height:100px;margin-top:-52px;position:relative;z-index:2;border:4px solid #000;border-radius:50%;background:linear-gradient(140deg,#e7e5a8,#b9c2a0);color:#101820;overflow:hidden;display:grid;place-items:center;font-size:38px;font-weight:800}
+.x-profile-avatar img{width:100%;height:100%;object-fit:cover}
+.x-profile-buttons{display:flex;justify-content:flex-end;gap:9px;margin-top:-48px;height:48px;align-items:flex-start}
+.x-profile-buttons button{border:1px solid #53606a;border-radius:24px;background:transparent;color:#eff3f4;padding:8px 17px;font-size:14px;font-weight:800;min-width:100px}
+.x-profile-identity h2{font-size:20px;margin:28px 0 2px;font-weight:800;display:flex;align-items:center;gap:6px}
+.x-profile-identity h2 .x-verified{width:17px;height:17px}
+.x-profile-handle{font-size:15px;color:#71767b}
+.x-profile-bio{font-size:15px;line-height:1.45;margin:13px 0 10px;white-space:pre-wrap}
+.x-profile-meta{display:flex;gap:14px;flex-wrap:wrap;color:#71767b;font-size:13px}
+.x-profile-stats{display:flex;gap:18px;margin:14px 0 0;font-size:14px}
+.x-profile-stats span{font-weight:400;color:#71767b}
+.x-profile-tabs{height:54px;display:flex;align-items:stretch;justify-content:space-around;border-bottom:1px solid #2f3336}
+.x-profile-tabs button{flex:1;border:0;background:transparent;color:#71767b;font-size:21px;position:relative}
+.x-profile-tabs button span{font-size:14px;font-weight:700;margin:0 4px}
+.x-profile-tabs button.active{color:#e7e9ea;font-weight:800}
+.x-profile-tabs button.active:after{content:"";position:absolute;bottom:0;left:18%;right:18%;height:4px;background:#1d9bf0;border-radius:4px}
+.x-profile-timeline{min-height:180px}
+.x-profile-empty{padding:48px 20px;text-align:center;color:#71767b;font-size:14px}
+.x-edit-card{margin:18px 14px 30px;padding:17px;border:1px solid #2f3336;border-radius:16px;background:#101418}
+.x-edit-card[hidden]{display:none!important}
+@media(max-width:650px){.x-profile-page{max-width:none}.x-profile-cover{height:190px}.x-profile-identity{padding-left:15px;padding-right:15px}.x-profile-avatar{width:100px;height:100px}.x-profile-buttons button{min-width:0;padding:8px 15px}.x-profile-identity h2{margin-top:28px}}
