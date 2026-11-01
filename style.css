@@ -117,3 +117,6 @@ body:has(.x-app) #content{width:100%;margin:0}
 .x-edit-card{margin:18px 14px 30px;padding:17px;border:1px solid #2f3336;border-radius:16px;background:#101418}
 .x-edit-card[hidden]{display:none!important}
 @media(max-width:650px){.x-profile-page{max-width:none}.x-profile-cover{height:190px}.x-profile-identity{padding-left:15px;padding-right:15px}.x-profile-avatar{width:100px;height:100px}.x-profile-buttons button{min-width:0;padding:8px 15px}.x-profile-identity h2{margin-top:28px}}
+
+
+.x-author-link{border:0;cursor:pointer}.x-author-link img{width:100%;height:100%;object-fit:cover;border-radius:50%}.x-post-meta .x-author-name{display:inline-flex;align-items:baseline;gap:7px;background:none;border:0;color:inherit;padding:0;text-align:left;cursor:pointer}.x-post-meta .x-author-name small{color:#71767b;font-size:13px}.x-post-actions button{cursor:pointer}.x-post-actions button.is-liked{color:#f91880}.x-post-actions button.is-reposted{color:#00ba7c}.x-post-actions button:disabled{opacity:.5}.x-profile-page{max-width:600px;margin:0 auto;background:#000;color:#e7e9ea}.x-profile-timeline .x-post{border-bottom:1px solid #2f3336}
