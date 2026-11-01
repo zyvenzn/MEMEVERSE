@@ -90,7 +90,7 @@
 
   async function loadUser(user) {
     const [{ data: profile }, { data: wallet, error: walletError }] = await Promise.all([
-      client.from("profiles").select("handle,display_name,bio,avatar_url,banner_url").eq("id", user.id).maybeSingle(),
+      client.from("profiles").select("id,handle,display_name,bio,avatar_url,banner_url,created_at").eq("id", user.id).maybeSingle(),
       client.from("wallets").select("balance").eq("user_id", user.id).maybeSingle()
     ]);
     render(user, profile, wallet?.balance ?? 0);
