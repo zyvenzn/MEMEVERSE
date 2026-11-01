@@ -114,7 +114,6 @@
     state.timer=setInterval(()=>{if(document.getElementById("trade-chart")){loadQuotes();loadCandles()}else clearInterval(state.timer)},30000);
   }
   window.initTradingTerminal=init;
-  document.addEventListener("click",e=>{if(e.target.closest('[data-page="trading"]'))setTimeout(init,0)});
   document.addEventListener("memeverse:auth",()=>{if(document.getElementById("trade-chart"))loadAccount()});
   const originalRender=window.renderTradingTerminal;window.renderTradingTerminal=()=>{const html=originalRender();setTimeout(init,0);return html};
 })();
