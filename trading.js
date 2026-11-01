@@ -103,7 +103,9 @@
     if(state.timer)clearInterval(state.timer);
     state.chart=null;state.candleSeries=null;state.resize?.disconnect();state.resize=null;
     const host=document.getElementById("trade-chart");if(!host)return;
-    const selectSymbol=e=>{const button=e.target.closest("[data-symbol]");if(!button)return;state.symbol=button.dataset.symbol;renderSelected();renderMarketList(Object.values(state.quotes))};\n    document.getElementById("trade-ticker-strip")?.addEventListener("click",selectSymbol);\n    document.getElementById("trade-market-list")?.addEventListener("click",selectSymbol);
+    const selectSymbol=e=>{const button=e.target.closest("[data-symbol]");if(!button)return;state.symbol=button.dataset.symbol;renderSelected();renderMarketList(Object.values(state.quotes))};
+    document.getElementById("trade-ticker-strip")?.addEventListener("click",selectSymbol);
+    document.getElementById("trade-market-list")?.addEventListener("click",selectSymbol);
     document.querySelectorAll("[data-interval]").forEach(el=>el.addEventListener("click",()=>{state.interval=el.dataset.interval;document.querySelectorAll("[data-interval]").forEach(b=>b.classList.toggle("active",b===el));loadCandles()}));
     document.querySelectorAll("[data-side]").forEach(el=>el.addEventListener("click",()=>{state.side=el.dataset.side;document.querySelectorAll("[data-side]").forEach(b=>b.classList.toggle("active",b===el));const submit=document.getElementById("trade-submit");if(submit){submit.textContent=(state.side==="buy"?"Buy ":"Sell ")+asset().base;submit.className="trade-submit "+(state.side==="buy"?"buy":"sell")}updateEstimate()}));
     document.querySelectorAll("[data-percent]").forEach(el=>el.addEventListener("click",()=>{const pct=Number(el.dataset.percent)/100,price=state.quotes[state.symbol]?.price||0,balance=Number(document.getElementById("trade-available")?.textContent.replace(/[^0-9.]/g,"")||0);if(price){const max=state.side==="buy"?(balance/1.001/price):(state.positions[state.symbol]||0);document.getElementById("trade-quantity").value=(max*pct).toFixed(8)}updateEstimate()}));
