@@ -47,3 +47,5 @@ Semua saldo, harga, token, dan interaksi saat ini hanya demo di browser. Jangan 
 4. Implementasikan satu modul sosial online.
 5. Tambahkan modul lain satu per satu.
 6. Bangun Pump.fun simulator dan trading engine.
+## Supabase setup
+Lihat [panduan koneksi Supabase](docs/SUPABASE_CONNECT.md) untuk menerapkan migration, mengatur URL autentikasi, dan menguji akun online. Jangan pernah memasukkan Secret/Service Role Key ke frontend.
