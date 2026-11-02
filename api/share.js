@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       const id = String(req.query.id || '');
       if (!/^[1-9][0-9]*$/.test(id)) return res.status(400).send('Invalid post id');
       const endpoint = SUPABASE_URL + '/rest/v1/x_post_view?select=id,body,handle,display_name,avatar_url,created_at&id=eq.' + encodeURIComponent(id) + '&limit=1';
-      const response = await fetch(endpoint, {headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
+      const response = await fetch(endpoint, {headers:{apikey:SUPABASE_KEY}});
       if (!response.ok) throw new Error('Post lookup failed');
       [record] = await response.json();
       if (!record) return res.status(404).send('Post not found');
