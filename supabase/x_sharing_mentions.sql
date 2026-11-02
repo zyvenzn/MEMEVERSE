@@ -15,23 +15,25 @@ drop policy if exists "Mentions are visible with public posts" on public.x_menti
 create policy "Mentions are visible with public posts" on public.x_mentions for select to anon, authenticated using (true);
 grant select on public.x_mentions to anon, authenticated;
 revoke insert, update, delete on public.x_mentions from anon, authenticated;
-grant usage, select on sequence public.x_mentions_id_seq to authenticated;
 alter table public.x_notifications drop constraint if exists x_notifications_type_check;
 alter table public.x_notifications add constraint x_notifications_type_check check (type in ('like', 'repost', 'reply', 'follow', 'mention'));
 create or replace function public.x_sync_post_mentions()
 returns trigger language plpgsql security definer set search_path = ''
 as $$
-declare matched record; mentioned_uid uuid;
+declare matched record; mentioned_uid uuid; mention_row_id bigint;
 begin
   for matched in
-    select m[2] as handle from regexp_matches(new.body, '(^|[^A-Za-z0-9_])@([A-Za-z0-9_]{3,20})', 'g') as m
+    select distinct lower(m.parts[2]) as handle
+    from regexp_matches(new.body, '(^|[^A-Za-z0-9_])@([A-Za-z0-9_]{3,20})', 'g') as m(parts)
   loop
-    select p.user_id into mentioned_uid from public.x_profiles p where p.handle = lower(matched.handle) limit 1;
+    select p.user_id into mentioned_uid from public.x_profiles p where p.handle = matched.handle limit 1;
     if mentioned_uid is not null then
+      mention_row_id := null;
       insert into public.x_mentions (post_id, mentioned_user_id, mentioned_by_user_id)
       values (new.id, mentioned_uid, new.author_id)
-      on conflict (post_id, mentioned_user_id) do nothing;
-      if mentioned_uid <> new.author_id then
+      on conflict (post_id, mentioned_user_id) do nothing
+      returning id into mention_row_id;
+      if mention_row_id is not null and mentioned_uid <> new.author_id then
         insert into public.x_notifications (user_id, actor_id, type, post_id)
         values (mentioned_uid, new.author_id, 'mention', new.id);
       end if;
