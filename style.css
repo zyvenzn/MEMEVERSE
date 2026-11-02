@@ -8,3 +8,5 @@
 @media(max-width:800px){.profile-layout{grid-template-columns:1fr}}
 
 .birthday-visibility{display:flex!important;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(120,120,150,.06)}.birthday-visibility input{margin-top:3px;accent-color:var(--accent)}.birthday-visibility span{display:grid;gap:4px}.birthday-visibility b{font-size:11px}.birthday-visibility small{font-size:10px;line-height:1.5;color:var(--muted)}
+
+.x-profile-summary{display:flex;align-items:center;gap:12px;margin:14px 0}.x-profile-summary .profile-avatar{width:58px;height:58px;font-size:20px;flex:0 0 58px}.x-profile-summary .muted{margin:3px 0 0}#x-profile-editor{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}#x-profile-editor[hidden]{display:none}
