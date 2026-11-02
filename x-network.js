@@ -30,7 +30,8 @@
     send: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
     share: '<path d="M12 16V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
-    at: '<circle cx="12" cy="12" r="9"/><path d="M16 12a4 4 0 1 1-1-2.65V13a2 2 0 0 0 4 0v-1"/>'
+    at: '<circle cx="12" cy="12" r="9"/><path d="M16 12a4 4 0 1 1-1-2.65V13a2 2 0 0 0 4 0v-1"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>'
   };
   const ic = (n, s) => '<svg class="xn-ic" width="' + (s || 20) + '" height="' + (s || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[n] + '</svg>';
 
@@ -62,6 +63,20 @@
     if (type === 'profile') url.searchParams.set('handle', value);
     else url.searchParams.set('id', String(value));
     return url.toString();
+  }
+
+  async function copyLink(url) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(url);
+      else {
+        const input = document.createElement('textarea');
+        input.value = url; input.style.position = 'fixed'; input.style.opacity = '0';
+        document.body.appendChild(input); input.select();
+        const copied = document.execCommand('copy'); input.remove();
+        if (!copied) throw new Error('Clipboard tidak tersedia');
+      }
+      toast('Link berhasil disalin');
+    } catch (err) { toast('Clipboard tidak tersedia. Link: ' + url); }
   }
 
   async function shareContent(url, title, text) {
@@ -129,6 +144,7 @@
       '<span class="xn-handle">@' + esc(p.handle) + '</span><span class="xn-dot">·</span><time>' + ago(p.created_at) + '</time></div>' +
       '<div class="xn-text">' + rich(p.body) + '</div>' +
       '<div class="xn-acts">' + (XN.uid ? actBtn('reply', 'comment', p.reply_count, false) + actBtn('repost', 'repeat', p.repost_count, p.reposted) + actBtn('like', 'heart', p.like_count, p.liked) : '') +
+      '<button class="xn-act share" data-act="copypost" data-pid="' + p.id + '" aria-label="Salin link postingan" title="Salin link postingan">' + ic('copy', 17) + '</button>' +
       '<button class="xn-act share" data-act="sharepost" data-pid="' + p.id + '" aria-label="Bagikan postingan" title="Bagikan postingan">' + ic('share', 17) + '</button>' +
       (mine ? '<button class="xn-act del" data-act="del" aria-label="Hapus">' + ic('trash', 17) + '</button>' : '') +
       '</div></div></div></article>';
@@ -232,7 +248,7 @@
     const me = pr.user_id === XN.uid;
     main().innerHTML = top(esc(pr.display_name || pr.handle), true) +
       '<div class="xn-phead"><div class="xn-prow">' + avatar(pr.handle, pr.display_name, 76) +
-      '<div class="xn-pbtns"><button class="button secondary xn-iconbtn" data-act="shareprofile" data-handle="' + esc(pr.handle) + '" aria-label="Bagikan profil" title="Bagikan profil">' + ic('share', 17) + '</button>' + (me ? '<button class="button secondary" data-act="editprofile">Edit profil</button>' :
+      '<div class="xn-pbtns"><button class="button secondary xn-iconbtn" data-act="copyprofile" data-handle="' + esc(pr.handle) + '" aria-label="Salin link profil" title="Salin link profil">' + ic('copy', 17) + '</button><button class="button secondary xn-iconbtn" data-act="shareprofile" data-handle="' + esc(pr.handle) + '" aria-label="Bagikan profil" title="Bagikan profil">' + ic('share', 17) + '</button>' + (me ? '<button class="button secondary" data-act="editprofile">Edit profil</button>' :
         (XN.uid ? '<button class="button secondary xn-iconbtn" data-act="chat" data-uid="' + pr.user_id + '" aria-label="Kirim pesan">' + ic('mail', 18) + '</button>' + followBtn(pr.user_id) : '<button class="button secondary" data-act="signin">Masuk untuk berinteraksi</button>')) + '</div></div>' +
       '<h2>' + esc(pr.display_name || pr.handle) + '</h2><div class="xn-handle">@' + esc(pr.handle) + '</div>' +
       (pr.bio ? '<p class="xn-bio">' + rich(pr.bio) + '</p>' : '') +
@@ -515,7 +531,9 @@
         case 'del': await deletePost(card); break;
         case 'profile': xnGo('profile', { handle: el.dataset.handle }); break;
         case 'tag': xnGo('explore', { q: el.dataset.q }); break;
+        case 'copyprofile': await copyLink(shareUrl('profile', el.dataset.handle)); break;
         case 'shareprofile': await shareContent(shareUrl('profile', el.dataset.handle), 'MEMEVERSE profile', 'Lihat profil @' + el.dataset.handle + ' di MEMEVERSE.'); break;
+        case 'copypost': await copyLink(shareUrl('post', el.dataset.pid)); break;
         case 'sharepost': await shareContent(shareUrl('post', el.dataset.pid), 'MEMEVERSE post', 'Lihat postingan ini di MEMEVERSE.'); break;
         case 'signin': {
           const u = new URL(window.location.href); ['x', 'u', 'id'].forEach((k) => u.searchParams.delete(k));
@@ -597,7 +615,7 @@
         btn.disabled = true;
         const { data: createdPost, error } = await xClient.from('x_posts').insert({ author_id: XN.uid, body, parent_id: f.dataset.parent ? +f.dataset.parent : null }).select('id').single();
         if (error) { toast('Posting gagal: ' + error.message); btn.disabled = false; return; }
-        const handles = [...new Set(Array.from(body.matchAll(/(?:^|\\s)@([A-Za-z0-9_]{3,20})/g), (m) => m[1].toLowerCase()))];
+        const handles = [...new Set(Array.from(body.matchAll(/(?:^|\s)@([A-Za-z0-9_]{3,20})/g), (m) => m[1].toLowerCase()))];
         if (handles.length) {
           const { data: mentioned, error: lookupError } = await xClient.from('x_profiles').select('user_id,handle').in('handle', handles);
           if (!lookupError && mentioned && mentioned.length) {
