@@ -1,21 +1,52 @@
 const state={balance:10000,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[{user:"@marketwatch",text:"Welcome to MEMEVERSE. The virtual economy is open for exploration.",time:"Just now"}],holdings:[],tokens:[],orders:[]};
 const money=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const content=document.getElementById("content"), title=document.getElementById("page-title");
+function renderOverview(){
+const apps=[
+{icon:"𝕏",name:"X Network",desc:"Social feed, posts & creators",page:"x",tone:"violet",meta:"Social"},
+{icon:"➤",name:"Telegram",desc:"Private chats & messaging",page:"telegram",tone:"blue",meta:"Messages"},
+{icon:"◉",name:"Discord",desc:"Servers & communities",page:"discord",tone:"indigo",meta:"Community"},
+{icon:"🚀",name:"Pump.fun",desc:"Launch & trade memecoins",page:"pump",tone:"orange",meta:"Launchpad"},
+{icon:"⌁",name:"Trading Terminal",desc:"Crypto, stocks & forex",page:"trading",tone:"green",meta:"Markets"},
+{icon:"▦",name:"Marketplace",desc:"Digital goods & services",page:"market",tone:"pink",meta:"Explore"}
+];
+const appCards=apps.map(a=>`<button class="universe-app-card ${a.tone}" onclick="go('${a.page}')"><span class="app-card-glow"></span><span class="universe-app-icon">${a.icon}</span><span class="universe-app-meta">${a.meta}</span><b>${a.name}</b><small>${a.desc}</small><span class="app-card-arrow">↗</span></button>`).join("");
+return `
+<section class="universe-hero">
+ <div class="hero-stars"></div><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-planet"><div class="planet-ring"></div><div class="planet-core"></div></div>
+ <div class="hero-copy"><span class="hero-kicker"><i></i> THE WEB3 UNIVERSE</span><h2>One universe.<br><em>Infinite possibilities.</em></h2><p>Connect, create, trade, and build your world inside MEMEVERSE.</p><div class="hero-actions"><button class="hero-primary" onclick="go('x')">Explore the universe <span>→</span></button><button class="hero-secondary" onclick="go('trading')">Open trading terminal ↗</button></div></div>
+ <div class="hero-live"><i></i><span>YOUR UNIVERSE IS LIVE</span><b>Welcome back, explorer</b><small>Everything you need, in one place.</small></div>
+ <div class="hero-index"><b>01</b><span>/</span><small>THE BEGINNING</small></div>
+</section>
+<section class="universe-apps-section"><div class="universe-section-heading"><div><span class="section-kicker">EXPLORE THE ECOSYSTEM</span><h2>Your applications</h2></div><span class="section-note">6 connected worlds</span></div><div class="universe-app-grid">${appCards}</div></section>
+<div class="universe-dashboard-grid">
+ <section class="universe-panel market-panel"><div class="universe-panel-head"><div><span class="section-kicker">THE PULSE OF THE MARKET</span><h2>Market overview</h2></div><span class="demo-chip">DEMO DATA</span></div><div class="market-tiles">
+  <article class="market-tile"><div class="market-asset"><span class="coin btc">₿</span><b>Bitcoin <small>BTC / USD</small></b></div><strong>$67,420.00</strong><span class="market-change positive">↗ +2.48%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 34 C18 31 18 18 34 24 S55 38 70 21 S94 27 109 15 S131 25 145 10 S164 18 180 3" /></svg></article>
+  <article class="market-tile"><div class="market-asset"><span class="coin eth">◆</span><b>Ethereum <small>ETH / USD</small></b></div><strong>$3,421.75</strong><span class="market-change positive">↗ +3.12%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 31 C17 27 22 34 38 22 S57 26 73 17 S94 29 112 13 S140 22 153 8 S169 12 180 3" /></svg></article>
+  <article class="market-tile"><div class="market-asset"><span class="coin sol">≋</span><b>Solana <small>SOL / USD</small></b></div><strong>$168.27</strong><span class="market-change positive">↗ +4.21%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 34 C15 26 25 31 40 19 S62 27 79 14 S104 25 121 10 S144 19 157 7 S171 9 180 2" /></svg></article>
+ </div><p class="market-disclaimer">Illustrative interface values only. Market feeds are not connected yet.</p><button class="panel-link" onclick="go('trading')">Open trading terminal <span>→</span></button></section>
+ <section class="universe-panel trending-panel"><div class="universe-panel-head"><div><span class="section-kicker">COMMUNITY MOMENTUM</span><h2>Trending tokens</h2></div><button class="text-link" onclick="go('pump')">View all ↗</button></div>
+  <div class="trend-row"><span class="trend-rank">01</span><span class="trend-token token-meme">M</span><span class="trend-name"><b>$MEME</b><small>MEMEVERSE Token</small></span><strong class="positive">+24.5%</strong></div>
+  <div class="trend-row"><span class="trend-rank">02</span><span class="trend-token token-doge">Ð</span><span class="trend-name"><b>$DOGE</b><small>Dogecoin</small></span><strong class="positive">+12.4%</strong></div>
+  <div class="trend-row"><span class="trend-rank">03</span><span class="trend-token token-pepe">P</span><span class="trend-name"><b>$PEPE</b><small>Pepe Coin</small></span><strong class="positive">+8.9%</strong></div>
+  <div class="trend-row"><span class="trend-rank">04</span><span class="trend-token token-sol">≋</span><span class="trend-name"><b>$SOL</b><small>Solana</small></span><strong class="positive">+7.6%</strong></div>
+  <p class="market-disclaimer">Illustrative trends, not live token data.</p></section>
+ <section class="universe-panel activity-panel"><div class="universe-panel-head"><div><span class="section-kicker">FROM ACROSS YOUR WORLDS</span><h2>Latest activity</h2></div><button class="text-link" onclick="go('x')">Open social ↗</button></div><article class="universe-activity"><span class="activity-avatar">M</span><div><b>MEMEVERSE Official <i>✓</i></b><small>@memeverse · Just now</small><p>Your Web3 universe is here. Explore, connect, and build something amazing. <a>#MEMEVERSE</a></p><div class="activity-actions"><span>♡ 128</span><span>↗ 32</span><span>◌ 1.2K views</span></div></div></article></section>
+ <section class="universe-panel communities-panel"><div class="universe-panel-head"><div><span class="section-kicker">FIND YOUR PEOPLE</span><h2>Top communities</h2></div><button class="text-link" onclick="go('discord')">Explore ↗</button></div>
+  <div class="community-row"><span class="community-avatar community-purple">M</span><span><b>MEME Culture</b><small>842K members</small></span><button onclick="go('discord')">Explore</button></div>
+  <div class="community-row"><span class="community-avatar community-orange">₿</span><span><b>Crypto Traders</b><small>730K members</small></span><button onclick="go('discord')">Explore</button></div>
+  <div class="community-row"><span class="community-avatar community-blue">⌘</span><span><b>Web3 Builders</b><small>521K members</small></span><button onclick="go('discord')">Explore</button></div>
+ </section>
+</div>`;
+}
 const pages={
-overview:()=>`<div class="grid stats">
-<div class="card"><div class="stat-label">MAIN BALANCE</div><div class="stat-value" id="stat-balance">${money(state.balance)}</div><div class="positive">● Virtual USD</div></div>
-<div class="card"><div class="stat-label">PORTFOLIO VALUE</div><div class="stat-value">${money(state.holdings.reduce((a,h)=>a+h.qty*h.price,0))}</div><div class="muted">Demo assets</div></div>
-<div class="card"><div class="stat-label">TOKENS CREATED</div><div class="stat-value">${state.tokens.length}</div><div class="muted">Pump.fun simulator</div></div>
-<div class="card"><div class="stat-label">ACCOUNT STATUS</div><div class="stat-value" style="font:700 16px Manrope">DEMO</div><div class="positive">● Local prototype</div></div></div>
-<div class="section-head"><h2>Applications</h2><span>Choose a platform</span></div>
-<div class="grid app-grid">
-${app("𝕏","X Network","Social feed, profiles and direct messages.","x")}${app("➤","Telegram","Virtual numbers, chats and channels.","telegram")}${app("◉","Discord","Servers, roles and communities.","discord")}${app("🚀","Pump.fun","Create virtual tokens and simulate trades.","pump")}${app("⌁","Trading","Explore crypto, stocks, forex and commodities.","trading")}${app("▦","Marketplace","Virtual products and player services.","market")}</div>
-<div class="section-head"><h2>Market watch</h2><span>Illustrative demo prices · not live</span></div>
-${marketTable()}`,
+overview:()=>renderOverview(),
 x:()=>`<div class="x-app" id="x-app">
   <header class="x-topbar">
-    <button class="x-avatar-button" onclick="openXProfile()" aria-label="Open profile"><span class="x-avatar">M</span></button>
+    <button class="x-back-home" onclick="goHome()" aria-label="Back to MEMEVERSE">‹</button>
     <div class="x-logo" aria-label="X">𝕏</div>
+    <button class="x-account-button" onclick="document.getElementById('auth-launcher').click()">Account</button>
+    <button class="x-avatar-button" onclick="openXProfile()" aria-label="Open profile"><span class="x-avatar">M</span></button>
     <button class="x-top-action" onclick="demoNotice()" aria-label="Find people"><svg viewBox="0 0 28 28"><path d="M14 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 25c.8-5 4.2-8 10-8 2.1 0 3.9.4 5.3 1.2M23 15v9m-4.5-4.5h9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
   </header>
   <nav class="x-tabs" aria-label="Timeline tabs">
@@ -96,14 +127,14 @@ function postHTML(p){return `<div class="feed-item"><b>${esc(p.user)}</b> <small
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function marketTable(){return `<table class="table"><tr><th>ASSET</th><th>PRICE</th><th>24H</th><th>MARKET</th></tr><tr><td class="asset">BTC <small>Bitcoin</small></td><td>$67,420</td><td class="positive">+2.4%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">ETH <small>Ethereum</small></td><td>$3,510</td><td class="positive">+1.2%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">SOL <small>Solana</small></td><td>$182</td><td class="negative">-0.8%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">AAPL <small>Apple</small></td><td>$221</td><td class="positive">+0.6%</td><td><span class="tag">Stock</span></td></tr><tr><td class="asset">EUR/USD <small>Euro / US Dollar</small></td><td>1.0842</td><td class="negative">-0.1%</td><td><span class="tag">Forex</span></td></tr></table>`}
 function tokenList(){return state.tokens.length?state.tokens.map(t=>`<div class="feed-item"><b>${esc(t.name)} (${esc(t.symbol)})</b><p>${esc(t.desc||"Community token")} · <span class="positive">${money(t.price)}</span></p></div>`).join(""):"<p class='muted'>No tokens yet. Launch the first one.</p>"}
-function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";window.scrollTo(0,0)}function goHome(){go("overview")}
+function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item,.dock-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||page==="x"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";window.scrollTo(0,0)}function goHome(){go("overview")}
 function updateBalance(){document.getElementById("top-balance").textContent=money(state.balance)}
 function buy(cost,item){if(state.balance<cost){alert("Saldo virtual tidak cukup.");return}state.balance-=cost;updateBalance();alert(item+" berhasil dibeli dalam demo. Saldo: "+money(state.balance));go(document.querySelector(".nav-item.active")?.dataset.page||"overview")}
 function addPost(){const el=document.getElementById("post-input");if(!el?.value.trim())return;state.posts.unshift({user:"@testtrader",displayName:"Test Trader",text:el.value.trim(),time:"now"});go("x")}
 function createServer(){const n=document.getElementById("server-name").value.trim();if(!n)return alert("Masukkan nama server.");document.getElementById("server-list").innerHTML=`<b>◉ ${esc(n)}</b><p class="muted"># general · Server demo created</p>`}
 function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});updateBalance();go("pump")}
 function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
-document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});
+document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});document.getElementById("mobile-dock")?.addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});
 go("overview");updateBalance();
 
 // X profile editor: requires window.supabaseClient configured with the signed-in Supabase session.
