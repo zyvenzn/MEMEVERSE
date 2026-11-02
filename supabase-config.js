@@ -1,12 +1,12 @@
-// Copy the Supabase Project URL and publishable/anon key from Supabase Dashboard > Project Settings > API.
-// This key is designed for browser use; never put a service_role or secret key here.
+// Browser-safe Supabase project configuration. Never place service_role or secret keys here.
 window.MEMEVERSE_SUPABASE_CONFIG = {
-  url: "",
-  anonKey: ""
+  url: "https://whgryvzbafwvyoiyujzf.supabase.co",
+  anonKey: "sb_publishable_v_xR7TZbN49NUGbv90pyLA_GrG3eWIS"
 };
 if (window.supabase?.createClient && window.MEMEVERSE_SUPABASE_CONFIG.url && window.MEMEVERSE_SUPABASE_CONFIG.anonKey) {
   window.supabaseClient = window.supabase.createClient(
     window.MEMEVERSE_SUPABASE_CONFIG.url,
-    window.MEMEVERSE_SUPABASE_CONFIG.anonKey
+    window.MEMEVERSE_SUPABASE_CONFIG.anonKey,
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
   );
 }
