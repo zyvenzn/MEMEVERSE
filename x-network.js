@@ -218,6 +218,13 @@
   async function vHome() {
     const tok = ++XN.tok;
     XN.newPosts = 0;
+    if (!XN.uid) {
+      main().innerHTML = top('X Network') +
+        '<div class="xn-signin"><span>Masuk untuk membuat postingan, mengikuti player, dan berinteraksi.</span><button class="button secondary" data-act="signin">Masuk</button></div>' +
+        '<div id="xn-list" class="xn-list">' + skel + '</div><div id="xn-more"></div>';
+      await fillFeed({ mode: 'foryou' }, false, tok);
+      return;
+    }
     main().innerHTML = top('Beranda') + tabs([['foryou', 'Untuk kamu'], ['following', 'Mengikuti']], XN.feedTab) +
       composer('Apa yang sedang terjadi?', 'Posting') + '<div id="xn-newpill"></div><div id="xn-list" class="xn-list">' + skel + '</div><div id="xn-more"></div>';
     await fillFeed({ mode: XN.feedTab }, false, tok);
