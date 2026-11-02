@@ -552,7 +552,7 @@
     const form = ta.closest('.xn-compose'), box = form && form.querySelector('.xn-mention-suggest');
     if (!form || !box || !XN.uid) return;
     const before = ta.value.slice(0, ta.selectionStart);
-    const match = before.match(/(?:^|\\s)@([A-Za-z0-9_]{1,20})$/);
+    const match = before.match(/(?:^|\s)@([A-Za-z0-9_]{1,20})$/);
     if (!match) { box.hidden = true; return; }
     const prefix = match[1].toLowerCase();
     form.dataset.mentionStart = String(before.length - prefix.length - 1);
