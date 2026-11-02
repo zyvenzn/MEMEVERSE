@@ -9,7 +9,7 @@ create table if not exists public.x_mentions (
   constraint x_mentions_post_user_unique unique (post_id, mentioned_user_id)
 );
 create index if not exists x_mentions_mentioned_user_created_idx on public.x_mentions (mentioned_user_id, created_at desc);
-create index if not exists x_mentions_post_idx on public.x_mentions (post_id);
+create index if not exists x_mentions_mentioned_by_created_idx on public.x_mentions (mentioned_by_user_id, created_at desc);
 
 alter table public.x_mentions enable row level security;
 drop policy if exists "Mentions are visible with public posts" on public.x_mentions;
