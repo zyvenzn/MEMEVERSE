@@ -595,8 +595,17 @@
         const ta = f.querySelector('textarea'), btn = f.querySelector('button'), body = ta.value.trim();
         if (!body) return;
         btn.disabled = true;
-        const { error } = await xClient.from('x_posts').insert({ author_id: XN.uid, body, parent_id: f.dataset.parent ? +f.dataset.parent : null });
+        const { data: createdPost, error } = await xClient.from('x_posts').insert({ author_id: XN.uid, body, parent_id: f.dataset.parent ? +f.dataset.parent : null }).select('id').single();
         if (error) { toast('Posting gagal: ' + error.message); btn.disabled = false; return; }
+        const handles = [...new Set(Array.from(body.matchAll(/(?:^|\\s)@([A-Za-z0-9_]{3,20})/g), (m) => m[1].toLowerCase()))];
+        if (handles.length) {
+          const { data: mentioned, error: lookupError } = await xClient.from('x_profiles').select('user_id,handle').in('handle', handles);
+          if (!lookupError && mentioned && mentioned.length) {
+            const rows = mentioned.map((p) => ({ post_id: createdPost.id, mentioned_user_id: p.user_id, mentioned_by_user_id: XN.uid }));
+            const { error: mentionError } = await xClient.from('x_mentions').insert(rows);
+            if (mentionError) toast('Posting terkirim, tetapi mention gagal disimpan: ' + mentionError.message);
+          } else if (lookupError) toast('Posting terkirim, tetapi akun mention gagal diverifikasi.');
+        }
         if (XN.view === 'thread') vThread(); else vHome();
       } else if (f.classList.contains('xn-search')) {
         e.preventDefault();
