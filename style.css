@@ -175,3 +175,25 @@ body.x-mode #content{width:100%;max-width:680px;margin:0 auto;min-height:100vh;p
   body.x-mode .x-avatar-camera{left:81px;top:-32px}
   body.x-mode .x-edit-fields{padding:78px 22px 25px}
 }
+
+/* Stage 1: account access */
+.auth-launcher{position:fixed;z-index:90;right:18px;top:16px;border:1px solid #536471;border-radius:22px;padding:9px 14px;background:#111a29;color:#eef3ff;font-weight:700;font-size:12px;cursor:pointer;max-width:48vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:800px){.auth-launcher{top:50px;right:12px;padding:7px 11px;font-size:11px;max-width:58vw}.ios-statusbar{pointer-events:none}}
+.auth-modal[hidden]{display:none}
+.auth-modal{position:fixed;z-index:200;inset:0;display:grid;place-items:center;padding:18px;background:#02050bdc;backdrop-filter:blur(9px)}
+.auth-card{position:relative;width:min(100%,420px);padding:30px 26px 24px;border:1px solid #29384d;border-radius:22px;background:#101827;color:#eef3ff;box-shadow:0 24px 80px #0009}
+.auth-close{position:absolute;right:16px;top:12px;border:0;background:transparent;color:#c8d2e2;font-size:28px;cursor:pointer}
+.auth-eyebrow{margin:0 0 8px;color:#8fa5c3;font-size:10px;font-weight:800;letter-spacing:2px}
+.auth-card h2{margin:0 30px 8px 0;font-size:23px}
+.auth-account-state{margin:0 0 18px;color:#9eabc0;font-size:12px}
+.auth-card form{display:flex;flex-direction:column;gap:13px}
+.auth-card form label{display:flex;flex-direction:column;gap:7px;color:#c3cee0;font-size:12px}
+.auth-card input{width:100%;box-sizing:border-box;border:1px solid #34445b;border-radius:10px;padding:12px 13px;background:#0a111e;color:#f3f6fc;font-size:14px;outline:none}
+.auth-card input:focus{border-color:#5c9ce5}
+.auth-submit{width:100%;border:0;border-radius:11px;padding:13px;background:#347fc9;color:white;font-size:14px;font-weight:800;cursor:pointer}
+.auth-submit:disabled{opacity:.6;cursor:wait}
+.auth-text-button{align-self:flex-start;border:0;background:transparent;color:#8fc5ff;padding:4px 0;font-size:12px;cursor:pointer}
+.auth-switch{margin-top:14px}
+.auth-message{min-height:18px;margin:12px 0 0;color:#aebbd0;font-size:12px;line-height:1.45}
+.auth-message.negative{color:#ff8d8d}.auth-message.positive{color:#81d6ad}
+.auth-signout{margin-top:12px;background:#29384d}
