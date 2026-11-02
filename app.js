@@ -16,7 +16,7 @@ x:()=>`<div class="x-app" id="x-app">
   <header class="x-topbar">
     <button class="x-avatar-button" onclick="openXProfile()" aria-label="Open profile"><span class="x-avatar">M</span></button>
     <div class="x-logo" aria-label="X">𝕏</div>
-    <button class="x-top-action" onclick="demoNotice()" aria-label="Find people">♙<sup>+</sup></button>
+    <button class="x-top-action" onclick="demoNotice()" aria-label="Find people"><svg viewBox="0 0 28 28"><path d="M14 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 25c.8-5 4.2-8 10-8 2.1 0 3.9.4 5.3 1.2M23 15v9m-4.5-4.5h9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
   </header>
   <nav class="x-tabs" aria-label="Timeline tabs">
     <button class="active" data-x-tab="For you" onclick="setXTab('For you')">For you <span class="x-chevron">⌄</span></button>
@@ -44,11 +44,11 @@ x:()=>`<div class="x-app" id="x-app">
   </div>
   <button class="x-fab" onclick="document.getElementById('post-input').focus()" aria-label="Compose post">＋</button>
   <nav class="x-bottom-nav" aria-label="Main navigation">
-    <button class="active" onclick="setXNav(this,'Home')" aria-label="Home">⌂</button>
-    <button onclick="setXNav(this,'Search')" aria-label="Search">⌕</button>
-    <button onclick="setXNav(this,'Grok')" aria-label="Grok">◉</button>
-    <button onclick="setXNav(this,'Notifications')" aria-label="Notifications">♧</button>
-    <button onclick="setXNav(this,'Messages')" aria-label="Messages">▢</button>
+    <button class="active" onclick="setXNav(this,'Home')" aria-label="Home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button onclick="setXNav(this,'Search')" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16.2 16.2 5 5"/></svg></button>
+    <button onclick="setXNav(this,'Grok')" aria-label="Grok"><svg viewBox="0 0 24 24"><path d="M4 18 18 4M6 5c6-3 13 1 13 7s-7 10-13 7"/></svg></button>
+    <button onclick="setXNav(this,'Notifications')" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
+    <button onclick="setXNav(this,'Messages')" aria-label="Messages"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 6 8 7 8-7"/></svg></button>
   </nav>
   <div id="x-profile-view" class="x-profile-view" hidden>
     <div class="x-profile-sheet">
