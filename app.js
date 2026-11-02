@@ -12,51 +12,95 @@ overview:()=>`<div class="grid stats">
 ${app("𝕏","X Network","Social feed, profiles and direct messages.","x")}${app("➤","Telegram","Virtual numbers, chats and channels.","telegram")}${app("◉","Discord","Servers, roles and communities.","discord")}${app("🚀","Pump.fun","Create virtual tokens and simulate trades.","pump")}${app("⌁","Trading","Explore crypto, stocks, forex and commodities.","trading")}${app("▦","Marketplace","Virtual products and player services.","market")}</div>
 <div class="section-head"><h2>Market watch</h2><span>Illustrative demo prices · not live</span></div>
 ${marketTable()}`,
-x:()=>`<p class="page-intro">A social network inside MEMEVERSE. Share updates and manage your player identity.</p>
-<div class="grid two">
-  <div class="card"><b>What's happening?</b><div class="form"><input id="post-input" class="input" placeholder="Share an update with the world..."><button class="button" onclick="addPost()">Post</button></div><div id="feed">${state.posts.map(postHTML).join("")}</div></div>
-  <div class="card">
-    <b>Your X profile</b><p class="muted">Your public player identity.</p>
-    <div class="x-profile-summary"><div class="profile-avatar" id="profile-avatar-preview">M</div><div><b id="profile-preview-name">Your display name</b><p class="muted" id="profile-preview-handle">@username</p></div></div>
-    <p id="profile-preview-bio" class="profile-bio">Your bio will appear here.</p>
-    <div class="profile-meta"><span id="profile-preview-location">⌖ Add your location</span><span id="profile-preview-website">↗ Add website</span><span id="profile-preview-birthday" hidden></span></div>
-    <button class="button secondary" id="x-edit-toggle" onclick="toggleXProfileEditor()">Edit profile</button>
-    <div id="x-profile-editor" hidden>
-      <div class="section-head"><h2>Edit X profile</h2><span>PLAYER IDENTITY</span></div>
-      <div class="profile-form">
-        <label>Display name<input id="x-display-name" class="input" maxlength="40" placeholder="Your display name"></label>
-        <label>Username<input id="x-handle" class="input" maxlength="24" placeholder="username (3–24 letters, numbers or _)"><small>Username must be unique. Use lowercase letters, numbers and underscore.</small></label>
-        <label>Bio<textarea id="x-bio" class="input" maxlength="160" rows="3" placeholder="Tell players about yourself (max 160 characters)"></textarea></label>
-        <label>Location<input id="x-location" class="input" maxlength="80" placeholder="City, country"></label>
-        <label>Website<input id="x-website" class="input" type="url" placeholder="https://example.com"></label>
-        <label>Birthday<input id="x-birthday" class="input" type="date"></label>
-        <label class="birthday-visibility"><input id="x-birthday-public" type="checkbox"> <span><b>Show my birthday on profile</b><small>When enabled, your birthday is visible to everyone on your public X profile. Otherwise, only you can see it.</small></span></label>
-        <div class="profile-upload-grid">
-          <label class="upload-control">Profile photo<input id="x-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG or WebP · max 2 MB</small></label>
-          <label class="upload-control">Profile banner<input id="x-banner-file" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG or WebP · max 2 MB</small></label>
+x:()=>`<div class="x-app" id="x-app">
+  <header class="x-topbar">
+    <button class="x-avatar-button" onclick="openXProfile()" aria-label="Open profile"><span class="x-avatar">M</span></button>
+    <div class="x-logo" aria-label="X">𝕏</div>
+    <button class="x-top-action" onclick="demoNotice()" aria-label="Find people">♙<sup>+</sup></button>
+  </header>
+  <nav class="x-tabs" aria-label="Timeline tabs">
+    <button class="active" data-x-tab="For you" onclick="setXTab('For you')">For you <span class="x-chevron">⌄</span></button>
+    <button data-x-tab="Following" onclick="setXTab('Following')">Following</button>
+    <button data-x-tab="Add" onclick="setXTab('Add')">Add <span>＋</span></button>
+    <button data-x-tab="Crypto" onclick="setXTab('Crypto')">Crypto</button>
+  </nav>
+  <section class="x-composer">
+    <div class="x-avatar x-composer-avatar">M</div>
+    <div class="x-compose-main">
+      <textarea id="post-input" maxlength="500" placeholder="What is happening?"></textarea>
+      <div class="x-compose-footer"><span id="x-char-count">500</span><button class="x-post-button" onclick="addPost()">Posting</button></div>
+    </div>
+  </section>
+  <div class="x-feed" id="feed">${state.posts.map(xPostHTML).join("")}
+    <article class="x-post x-promoted">
+      <div class="x-post-avatar x-ad-avatar">M</div>
+      <div class="x-post-main">
+        <div class="x-post-heading"><b>MEMEVERSE</b><span class="x-verified">✓</span><span class="x-handle">@memeverse</span><span class="x-dot">·</span><span class="x-time">Promoted</span><span class="x-more">···</span></div>
+        <p>Discover a new virtual economy. Connect, create, and explore with players across MEMEVERSE.</p>
+        <div class="x-ad-art"><div class="x-ad-brand">MEMEVERSE</div><strong>YOUR WORLD.<br>YOUR ECONOMY.</strong><span>Explore the universe</span></div>
+        <div class="x-actions"><button onclick="demoNotice()">♡ <span>12</span></button><button onclick="demoNotice()">⇄ <span>4</span></button><button onclick="demoNotice()">♡ <span>28</span></button><button onclick="demoNotice()">▥ <span>1.2K</span></button><button onclick="demoNotice()">♧</button><button onclick="demoNotice()">↗</button></div>
+      </div>
+    </article>
+  </div>
+  <button class="x-fab" onclick="document.getElementById('post-input').focus()" aria-label="Compose post">＋</button>
+  <nav class="x-bottom-nav" aria-label="Main navigation">
+    <button class="active" onclick="setXNav(this,'Home')" aria-label="Home">⌂</button>
+    <button onclick="setXNav(this,'Search')" aria-label="Search">⌕</button>
+    <button onclick="setXNav(this,'Grok')" aria-label="Grok">◉</button>
+    <button onclick="setXNav(this,'Notifications')" aria-label="Notifications">♧</button>
+    <button onclick="setXNav(this,'Messages')" aria-label="Messages">▢</button>
+  </nav>
+  <div id="x-profile-view" class="x-profile-view" hidden>
+    <div class="x-profile-sheet">
+      <div class="x-profile-sheet-head"><button onclick="closeXProfile()">←</button><b>Profile</b><button onclick="closeXProfile()">×</button></div>
+      <div class="x-profile-banner" id="profile-banner-preview"><span> </span></div>
+      <div class="x-profile-controls"><div class="profile-avatar" id="profile-avatar-preview">M</div><button class="x-edit-profile-button" onclick="toggleXProfileEditor()">Edit profile</button></div>
+      <h2 id="profile-preview-name">Your display name</h2><p class="x-profile-handle" id="profile-preview-handle">@username</p>
+      <p id="profile-preview-bio" class="x-profile-bio">Your bio will appear here.</p>
+      <div class="x-profile-meta"><span id="profile-preview-location">⌖ Add your location</span><span id="profile-preview-website">↗ Add website</span><span id="profile-preview-birthday" hidden></span></div>
+      <p class="x-profile-stats"><b>0</b> Followers　<b>0</b> Following　<b>${state.posts.length}</b> Posts</p>
+      <div id="x-profile-editor" hidden>
+        <div class="x-editor-title">Edit profile</div>
+        <div class="profile-form">
+          <label>Display name<input id="x-display-name" class="input" maxlength="40" placeholder="Your display name"></label>
+          <label>Username<input id="x-handle" class="input" maxlength="24" placeholder="username (3–24 letters, numbers or _)"><small>Username must be unique. Use lowercase letters, numbers and underscore.</small></label>
+          <label>Bio<textarea id="x-bio" class="input" maxlength="160" rows="3" placeholder="Tell players about yourself (max 160 characters)"></textarea></label>
+          <label>Location<input id="x-location" class="input" maxlength="80" placeholder="City, country"></label>
+          <label>Website<input id="x-website" class="input" type="url" placeholder="https://example.com"></label>
+          <label>Birthday<input id="x-birthday" class="input" type="date"></label>
+          <label class="birthday-visibility"><input id="x-birthday-public" type="checkbox"> <span><b>Show my birthday on profile</b><small>When enabled, your birthday is visible to everyone on your public X profile. Otherwise, only you can see it.</small></span></label>
+          <div class="profile-upload-grid">
+            <label class="upload-control">Profile photo<input id="x-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG or WebP · max 2 MB</small></label>
+            <label class="upload-control">Profile banner<input id="x-banner-file" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG or WebP · max 2 MB</small></label>
+          </div>
+          <p id="x-profile-status" class="muted" role="status">Login MEMEVERSE untuk memuat dan menyimpan profil online.</p>
+          <button class="x-save-profile" id="x-profile-save" onclick="saveXProfile()">Save</button>
         </div>
-        <p id="x-profile-status" class="muted" role="status">Sign in with a connected MEMEVERSE account to load and save your profile online.</p>
-        <button class="button" id="x-profile-save" onclick="saveXProfile()">Save profile</button>
       </div>
     </div>
-    <div class="section-head"><h2>Premium</h2></div><p class="muted">Premium badge and profile perks.</p><button class="button" onclick="buy(15,'X Premium')">Buy Premium · $15</button>
   </div>
 </div>`,
+
 telegram:()=>`<p class="page-intro">A private messaging platform with fictional in-game phone numbers.</p><div class="grid two"><div class="card"><b>Virtual number store</b><p class="muted">Numbers are simulated and cannot receive real SMS or calls.</p><div class="notice">🇺🇸 +1 202 ••• 0184 <button class="button" onclick="buy(5,'Virtual number')">Buy $5</button></div><br><div class="notice">🇮🇩 +62 811 ••• 4920 <button class="button" onclick="buy(5,'Virtual number')">Buy $5</button></div></div><div class="card"><b>Telegram profile</b><div class="form"><input class="input" placeholder="Display name"><input class="input" placeholder="@username"></div><div class="form"><input class="input" placeholder="Bio"></div><button class="button secondary" onclick="demoNotice()">Save profile (demo)</button><div class="section-head"><h2>Chats</h2></div><p class="muted">Your chats and groups will appear here after online accounts are implemented.</p></div></div>`,
 discord:()=>`<p class="page-intro">Build communities, organize channels and trade server templates.</p><div class="grid two"><div class="card"><b>Create a server</b><div class="form"><input id="server-name" class="input" placeholder="Server name"><button class="button" onclick="createServer()">Create</button></div><div id="server-list" class="feed-item"><small>No servers created in this demo yet.</small></div></div><div class="card"><b>Server template store</b><p class="muted">Starter layouts for gaming, trading and community servers.</p><div class="feed-item"><b>Trading Community</b><p>Announcements, market-chat, signals</p><button class="button" onclick="buy(25,'Trading server template')">Buy $25</button></div><div class="feed-item"><b>Gaming Community</b><p>General, looking-for-group, events</p><button class="button" onclick="buy(20,'Gaming server template')">Buy $20</button></div></div></div>`,
 pump:()=>`<p class="page-intro">A fictional token launchpad with simulated balances and a simplified bonding-curve demo. No real blockchain or wallet connection.</p><div class="notice">Leaderboard is intentionally located only inside this Pump.fun module. Token prices and rewards in this prototype are illustrative.</div><div class="grid two" style="margin-top:14px"><div class="card"><b>Virtual wallet</b><div class="stat-value">${money(state.balance)}</div><span class="muted">Available demo balance</span><div class="section-head"><h2>Create token</h2></div><div class="form"><input id="token-name" class="input" placeholder="Token name"><input id="token-symbol" class="input" placeholder="Ticker"></div><div class="form"><input id="token-desc" class="input" placeholder="Description"></div><button class="button" onclick="createToken()">Launch simulated token · $100</button></div><div class="card"><b>Token discovery</b><div id="tokens">${tokenList()}</div></div></div><div class="section-head"><h2>Pump.fun leaderboard</h2><span>Demo ranking</span></div><div class="card"><table class="table"><tr><th>RANK</th><th>CREATOR</th><th>VIRTUAL REWARDS</th></tr><tr><td>#1</td><td>@demo_creator</td><td class="positive">$1,250</td></tr><tr><td>#2</td><td>@moonbuilder</td><td>$840</td></tr><tr><td>#3</td><td>@testtrader</td><td>$420</td></tr></table></div>`,
 trading:()=>`<p class="page-intro">Market prices below are mock data for interface testing, not real-time quotes. Real market feeds will be connected in a later phase.</p><div class="card"><div class="section-head"><h2>Market overview</h2><span>DEMO DATA</span></div>${marketTable()}<div class="notice">Trading execution, chart history, order book, stop loss and take profit require the secure backend. This screen is a frontend prototype.</div></div>`,
 market:()=>`<p class="page-intro">A player-to-player marketplace for virtual goods and services.</p><div class="grid app-grid"><div class="card"><div class="app-icon">📱</div><b>Virtual Telegram number</b><p>Fictional in-game phone identity.</p><span class="tag">$5</span></div><div class="card"><div class="app-icon">✦</div><b>X Premium</b><p>Premium profile features and badge.</p><span class="tag">$15</span></div><div class="card"><div class="app-icon">◉</div><b>Discord template</b><p>Ready-made server structure.</p><span class="tag">$20+</span></div></div><div class="section-head"><h2>Player services</h2></div><div class="card"><p class="muted">Player listings, escrow, delivery confirmation and dispute handling will be added after account and backend systems are ready.</p></div>`
 };
+function xPostHTML(p){return `<article class="x-post"><div class="x-post-avatar">${esc((p.user||"M").replace("@","").slice(0,1).toUpperCase())}</div><div class="x-post-main"><div class="x-post-heading"><b>${esc((p.displayName||p.user||"Player").replace("@",""))}</b><span class="x-handle">${esc(p.user||"@player")}</span><span class="x-dot">·</span><span class="x-time">${esc(p.time||"now")}</span><button class="x-more" aria-label="More" onclick="demoNotice()">···</button></div><p>${esc(p.text)}</p><div class="x-actions"><button onclick="demoNotice()" aria-label="Reply">▢ <span>0</span></button><button onclick="demoNotice()" aria-label="Repost">⇄ <span>0</span></button><button onclick="demoNotice()" aria-label="Like">♡ <span>0</span></button><button onclick="demoNotice()" aria-label="Views">▥ <span>0</span></button><button onclick="demoNotice()" aria-label="Bookmark">♧</button><button onclick="demoNotice()" aria-label="Share">↗</button></div></div></article>`}
+function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto")demoNotice()}
+function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home")return;if(label==="Profile")openXProfile();else demoNotice()}
+function openXProfile(){document.getElementById("x-profile-view").hidden=false}
+function closeXProfile(){document.getElementById("x-profile-view").hidden=true;document.getElementById("x-profile-editor").hidden=true}
 function app(icon,name,desc,page){return `<div class="card app-card" onclick="go('${page}')"><div class="app-icon">${icon}</div><b>${name}</b><p>${desc}</p></div>`}
 function postHTML(p){return `<div class="feed-item"><b>${esc(p.user)}</b> <small>· ${esc(p.time)}</small><p>${esc(p.text)}</p></div>`}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function marketTable(){return `<table class="table"><tr><th>ASSET</th><th>PRICE</th><th>24H</th><th>MARKET</th></tr><tr><td class="asset">BTC <small>Bitcoin</small></td><td>$67,420</td><td class="positive">+2.4%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">ETH <small>Ethereum</small></td><td>$3,510</td><td class="positive">+1.2%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">SOL <small>Solana</small></td><td>$182</td><td class="negative">-0.8%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">AAPL <small>Apple</small></td><td>$221</td><td class="positive">+0.6%</td><td><span class="tag">Stock</span></td></tr><tr><td class="asset">EUR/USD <small>Euro / US Dollar</small></td><td>1.0842</td><td class="negative">-0.1%</td><td><span class="tag">Forex</span></td></tr></table>`}
 function tokenList(){return state.tokens.length?state.tokens.map(t=>`<div class="feed-item"><b>${esc(t.name)} (${esc(t.symbol)})</b><p>${esc(t.desc||"Community token")} · <span class="positive">${money(t.price)}</span></p></div>`).join(""):"<p class='muted'>No tokens yet. Launch the first one.</p>"}
-function go(page){document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=({overview:"Overview",x:"X Network",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading Terminal",market:"Marketplace"})[page];content.innerHTML=pages[page]();window.scrollTo(0,0)}
+function go(page){document.body.classList.toggle("x-mode",page==="x");document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=({overview:"Overview",x:"X Network",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading Terminal",market:"Marketplace"})[page];content.innerHTML=pages[page]();window.scrollTo(0,0)}
 function updateBalance(){document.getElementById("top-balance").textContent=money(state.balance)}
 function buy(cost,item){if(state.balance<cost){alert("Saldo virtual tidak cukup.");return}state.balance-=cost;updateBalance();alert(item+" berhasil dibeli dalam demo. Saldo: "+money(state.balance));go(document.querySelector(".nav-item.active")?.dataset.page||"overview")}
-function addPost(){const el=document.getElementById("post-input");if(!el.value.trim())return;state.posts.unshift({user:"@testtrader",text:el.value.trim(),time:"Just now"});go("x")}
+function addPost(){const el=document.getElementById("post-input");if(!el?.value.trim())return;state.posts.unshift({user:"@testtrader",displayName:"Test Trader",text:el.value.trim(),time:"now"});go("x")}
 function createServer(){const n=document.getElementById("server-name").value.trim();if(!n)return alert("Masukkan nama server.");document.getElementById("server-list").innerHTML=`<b>◉ ${esc(n)}</b><p class="muted"># general · Server demo created</p>`}
 function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});updateBalance();go("pump")}
 function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
@@ -73,5 +117,5 @@ async function loadXProfile(){const client=xClient();if(!client){setXProfileStat
 async function uploadXProfileImage(client,userId,file,kind){if(!file)return null;const ext=file.name.split(".").pop().toLowerCase();const path=`${userId}/${kind}-${Date.now()}.${ext}`;const {error}=await client.storage.from("profile-media").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});if(error)throw error;const {data}=client.storage.from("profile-media").getPublicUrl(path);return data.publicUrl}
 async function saveXProfile(){const client=xClient();if(!client){setXProfileStatus("Supabase belum dikonfigurasi. Tidak ada perubahan online yang disimpan.",true);return}const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){setXProfileStatus("Login diperlukan sebelum menyimpan profil.",true);return}const get=id=>document.getElementById(id).value.trim();const handle=get("x-handle").replace(/^@/,"").toLowerCase(),displayName=get("x-display-name"),bio=get("x-bio"),location=get("x-location"),website=get("x-website"),birthday=document.getElementById("x-birthday").value||null;if(!/^[a-z0-9_]{3,24}$/.test(handle)){setXProfileStatus("Username harus 3–24 karakter: huruf kecil, angka, atau underscore.",true);return}if(!displayName||displayName.length>40||bio.length>160||location.length>80){setXProfileStatus("Periksa display name, bio, dan location.",true);return}if(website&&!(website.startsWith("https://")||website.startsWith("http://"))){setXProfileStatus("Website harus memakai URL lengkap yang diawali https:// atau http://.",true);return}const button=document.getElementById("x-profile-save");button.disabled=true;button.textContent="Saving...";try{const [avatarUrl,bannerUrl]=await Promise.all([uploadXProfileImage(client,user.id,state.xAvatarFile,"avatar"),uploadXProfileImage(client,user.id,state.xBannerFile,"banner")]);const showBirthday=document.getElementById("x-birthday-public").checked;const update={handle,display_name:displayName,bio,location,website_url:website||null,birthday_public:showBirthday?birthday:null};if(avatarUrl)update.avatar_url=avatarUrl;if(bannerUrl)update.banner_url=bannerUrl;const {error}=await client.from("profiles").update(update).eq("id",user.id);if(error)throw error;const {error:privateError}=await client.from("profile_private").upsert({user_id:user.id,birthday,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(privateError)throw privateError;state.xAvatarFile=null;state.xBannerFile=null;state.xProfile={...state.xProfile,...update,avatar_url:avatarUrl||state.xProfile.avatar_url,banner_url:bannerUrl||state.xProfile.banner_url};setXProfileStatus("Profil X berhasil disimpan.");}catch(error){setXProfileStatus(error.message||"Gagal menyimpan profil.",true)}finally{button.disabled=false;button.textContent="Save profile"}}
 document.addEventListener("change",e=>{if(e.target.id==="x-avatar-file")previewXImage(e.target,"profile-avatar-preview",false);if(e.target.id==="x-banner-file")previewXImage(e.target,"profile-banner-preview",true)});
-document.addEventListener("input",e=>{if(["x-display-name","x-handle","x-bio","x-location","x-website","x-birthday","x-birthday-public"].includes(e.target.id))updateXProfilePreview()});
+document.addEventListener("input",e=>{if(e.target.id==="post-input"){const count=document.getElementById("x-char-count");if(count)count.textContent=500-e.target.value.length}if(["x-display-name","x-handle","x-bio","x-location","x-website","x-birthday","x-birthday-public"].includes(e.target.id))updateXProfilePreview()});
 
