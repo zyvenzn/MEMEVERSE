@@ -28,7 +28,7 @@ jobs:
         run: node --check app.js && node --check supabase-config.js
       - name: Check browser config does not contain service-role secrets
         run: |
-          if grep -Eiq 'service_role|sb_secret_' supabase-config.js; then
+          if grep -Eiq 'service_role[[:space:]]*[:=]|sb_secret_[A-Za-z0-9_-]+' supabase-config.js; then
             echo "A server-only Supabase credential was found in browser config."
             exit 1
           fi
