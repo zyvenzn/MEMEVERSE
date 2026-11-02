@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       const handle = String(req.query.handle || '').toLowerCase();
       if (!/^[a-z0-9_]{3,20}$/.test(handle)) return res.status(400).send('Invalid profile handle');
       const endpoint = SUPABASE_URL + '/rest/v1/x_profile_view?select=handle,display_name,bio,avatar_url&handle=eq.' + encodeURIComponent(handle) + '&limit=1';
-      const response = await fetch(endpoint, {headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
+      const response = await fetch(endpoint, {headers:{apikey:SUPABASE_KEY}});
       if (!response.ok) throw new Error('Profile lookup failed');
       [record] = await response.json();
       if (!record) return res.status(404).send('Profile not found');
