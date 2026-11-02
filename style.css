@@ -346,3 +346,26 @@ body{background:radial-gradient(ellipse at 70% -20%,#25154b 0,transparent 38%),#
  .x-app{max-width:760px;margin:0 auto;border-left:1px solid #202327;border-right:1px solid #202327}
  .x-fab{right:max(24px,calc((100vw - 760px)/2 + 24px))}
 }
+
+/* MEMEVERSE responsive web layout: remove simulated iPhone chrome */
+.ios-statusbar,.ios-dynamic-island,.ios-status-icons,.ios-home-indicator{display:none!important}
+@media(max-width:800px){
+  body{padding-top:0!important}
+  .shell{padding-top:0!important;min-height:100dvh}
+  .mobile-app-header{top:0!important}
+  body.x-mode .x-profile-view{top:0!important}
+  body.x-mode .x-profile-sheet-head{top:0!important}
+  body.x-mode .x-bottom-nav{bottom:0!important}
+  body.x-mode .x-fab{bottom:86px!important}
+  body.x-mode .x-app{padding-bottom:76px!important}
+  body.x-mode .x-profile-view{bottom:0!important}
+  .mobile-app-screen{min-height:100dvh!important}
+  body.app-open #content{min-height:100dvh!important}
+  body.app-open .main{padding-top:0!important}
+  #content{max-width:none!important}
+}
+@media(min-width:801px){
+  .shell{min-height:100vh}
+  .sidebar{display:flex}
+  .main{min-width:0}
+}
