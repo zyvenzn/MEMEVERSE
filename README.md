@@ -58,3 +58,7 @@ Before using online profile editing:
 4. Public profile fields are stored in `public.profiles`; birthday is stored separately in `public.profile_private` and is visible only to its owner.
 
 The current starter app does not yet include login UI. Until Auth is wired, the profile editor will explain that online save requires a signed-in account.
+
+
+### Birthday visibility
+The X profile editor stores the canonical birthday in the owner-only `profile_private` table. The optional **Show my birthday on profile** checkbox copies the selected date into `profiles.birthday_public`, which is part of the public profile data. When unchecked, `birthday_public` is cleared while the private birthday remains saved.
