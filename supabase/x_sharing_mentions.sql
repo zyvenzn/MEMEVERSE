@@ -10,44 +10,79 @@ create table if not exists public.x_mentions (
 );
 create index if not exists x_mentions_mentioned_user_created_idx on public.x_mentions (mentioned_user_id, created_at desc);
 create index if not exists x_mentions_post_idx on public.x_mentions (post_id);
+
 alter table public.x_mentions enable row level security;
 drop policy if exists "Mentions are visible with public posts" on public.x_mentions;
-create policy "Mentions are visible with public posts" on public.x_mentions for select to anon, authenticated using (true);
+create policy "Mentions are visible with public posts" on public.x_mentions
+  for select to anon, authenticated using (true);
+drop policy if exists "Authors can add verified mentions to their posts" on public.x_mentions;
+create policy "Authors can add verified mentions to their posts" on public.x_mentions
+  for insert to authenticated
+  with check (
+    mentioned_by_user_id = (select auth.uid())
+    and exists (
+      select 1
+      from public.x_posts p
+      join public.x_profiles target on target.user_id = x_mentions.mentioned_user_id
+      where p.id = x_mentions.post_id
+        and p.author_id = (select auth.uid())
+        and p.body ~* ('(^|[^A-Za-z0-9_])@' || target.handle || '([^A-Za-z0-9_]|$)')
+    )
+  );
 grant select on public.x_mentions to anon, authenticated;
-revoke insert, update, delete on public.x_mentions from anon, authenticated;
-alter table public.x_notifications drop constraint if exists x_notifications_type_check;
-alter table public.x_notifications add constraint x_notifications_type_check check (type in ('like', 'repost', 'reply', 'follow', 'mention'));
-create or replace function public.x_sync_post_mentions()
-returns trigger language plpgsql security definer set search_path = ''
+grant insert on public.x_mentions to authenticated;
+revoke update, delete on public.x_mentions from anon, authenticated;
+
+alter table public.x_notifications
+  drop constraint if exists x_notifications_type_check;
+alter table public.x_notifications
+  add constraint x_notifications_type_check
+  check (type in ('like', 'repost', 'reply', 'follow', 'mention'));
+create unique index if not exists x_notifications_mention_unique_idx
+  on public.x_notifications (user_id, actor_id, type, post_id)
+  where type = 'mention';
+
+drop policy if exists "Users create notifications for verified mentions" on public.x_notifications;
+create policy "Users create notifications for verified mentions" on public.x_notifications
+  for insert to authenticated
+  with check (
+    actor_id = (select auth.uid())
+    and type = 'mention'
+    and post_id is not null
+    and exists (
+      select 1 from public.x_mentions m
+      where m.post_id = x_notifications.post_id
+        and m.mentioned_user_id = x_notifications.user_id
+        and m.mentioned_by_user_id = (select auth.uid())
+    )
+  );
+grant insert on public.x_notifications to authenticated;
+
+create or replace function public.x_notify_mention()
+returns trigger
+language plpgsql
+set search_path = ''
 as $$
-declare matched record; mentioned_uid uuid; mention_row_id bigint;
 begin
-  for matched in
-    select distinct lower(m.parts[2]) as handle
-    from regexp_matches(new.body, '(^|[^A-Za-z0-9_])@([A-Za-z0-9_]{3,20})', 'g') as m(parts)
-  loop
-    select p.user_id into mentioned_uid from public.x_profiles p where p.handle = matched.handle limit 1;
-    if mentioned_uid is not null then
-      mention_row_id := null;
-      insert into public.x_mentions (post_id, mentioned_user_id, mentioned_by_user_id)
-      values (new.id, mentioned_uid, new.author_id)
-      on conflict (post_id, mentioned_user_id) do nothing
-      returning id into mention_row_id;
-      if mention_row_id is not null and mentioned_uid <> new.author_id then
-        insert into public.x_notifications (user_id, actor_id, type, post_id)
-        values (mentioned_uid, new.author_id, 'mention', new.id);
-      end if;
-    end if;
-    mentioned_uid := null;
-  end loop;
+  if new.mentioned_user_id <> new.mentioned_by_user_id then
+    insert into public.x_notifications (user_id, actor_id, type, post_id)
+    values (new.mentioned_user_id, new.mentioned_by_user_id, 'mention', new.post_id)
+    on conflict (user_id, actor_id, type, post_id) where type = 'mention' do nothing;
+  end if;
   return new;
 end;
 $$;
-revoke execute on function public.x_sync_post_mentions() from public, anon, authenticated;
-drop trigger if exists x_post_sync_mentions on public.x_posts;
-create trigger x_post_sync_mentions after insert on public.x_posts for each row execute function public.x_sync_post_mentions();
-do $$ begin
-  begin alter publication supabase_realtime add table public.x_mentions;
+revoke execute on function public.x_notify_mention() from public, anon, authenticated;
+drop trigger if exists x_mention_notification on public.x_mentions;
+create trigger x_mention_notification
+  after insert on public.x_mentions
+  for each row execute function public.x_notify_mention();
+
+do $$
+begin
+  begin
+    alter publication supabase_realtime add table public.x_mentions;
   exception when duplicate_object then null;
   end;
-end $$;
+end;
+$$;
