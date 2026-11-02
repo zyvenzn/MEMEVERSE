@@ -165,3 +165,18 @@
   .xn-compose{padding:12px}
   .xn-acts{max-width:none}
 }
+
+/* Profile/post sharing and account mentions */
+.xn-act.share{color:var(--muted)}
+.xn-act.share:hover{color:var(--cyan);background:rgba(87,214,208,.1)}
+.xn-pbtns .button{white-space:nowrap}
+.xn-mention-suggest{position:relative;z-index:8;display:flex;flex-direction:column;gap:2px;margin:4px 0 10px;background:#111b2d;border:1px solid var(--xn-line);border-radius:12px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.xn-mention-suggest[hidden]{display:none}
+.xn-mention-option{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;background:transparent;border:0;color:#fff;text-align:left;cursor:pointer}
+.xn-mention-option:hover{background:var(--xn-hover)}
+.xn-mention-option span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.xn-mention-option b{font-size:12px}
+.xn-mention-option small{font-size:11px;color:var(--muted)}
+.xn-signin{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--xn-line);color:var(--muted);font-size:12px}
+.xn-public{grid-column:1/-1;max-width:680px;width:100%;margin:0 auto;border:1px solid var(--xn-line);border-radius:14px;overflow:hidden}
+@media(max-width:800px){.xn-public{border:0;border-radius:0}}
