@@ -34,3 +34,66 @@ body.x-mode #content{width:100%;max-width:680px;margin:0 auto;min-height:100vh;p
 @media(max-width:420px){.x-topbar{height:64px;padding:0 16px}.x-tabs{height:62px}.x-tabs button{font-size:15px;padding:0 16px}.x-composer{padding:15px 14px}.x-compose-main textarea{font-size:18px;min-height:75px}.x-post{padding:14px 13px 10px;gap:10px}.x-post-avatar{width:42px;height:42px;flex-basis:42px}.x-post-main>p{font-size:15px}.x-post-heading{font-size:13px}.x-post-heading b{font-size:14px}.x-actions button{font-size:18px}.x-ad-art{height:190px}.x-ad-art strong{font-size:27px}}
 
 .x-top-action svg{width:29px;height:29px;display:block}.x-bottom-nav svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}.x-bottom-nav button.active svg{stroke-width:2.3}.x-avatar-button .x-avatar{background-color:#286b9c}.x-profile-banner{position:relative}
+
+/* iPhone-style MEMEVERSE mobile shell */
+.ios-statusbar,.ios-home-indicator{display:none}
+@media(max-width:800px){
+  html,body{min-height:100%;background:#070a12}
+  body{padding-top:0}
+  .ios-statusbar{position:fixed;z-index:120;top:0;left:0;right:0;height:42px;padding:0 23px;display:flex;align-items:center;justify-content:space-between;background:#080b13;color:#f7f8fc;font:600 14px -apple-system,BlinkMacSystemFont,Arial,sans-serif;letter-spacing:.1px}
+  .ios-dynamic-island{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:102px;height:25px;border-radius:18px;background:#000;box-shadow:inset 0 0 0 1px #151820}
+  .ios-status-icons{font-size:12px;letter-spacing:3px}
+  .shell{display:block;min-height:100dvh;padding-top:42px;background:#080b13}
+  .sidebar{display:none!important}
+  .main{width:100%;max-width:none;margin:0;padding:0 18px 42px;min-height:calc(100dvh - 42px);background:#080b13}
+  .topbar{display:none!important}
+  #content{width:100%;max-width:520px;margin:0 auto;min-height:calc(100dvh - 84px)}
+  .main:before{content:"MEMEVERSE";display:block;padding:23px 3px 5px;color:#f5f6fa;font-size:25px;font-weight:800;letter-spacing:-.8px}
+  body:not(.app-open) #content:before{content:"Your virtual world";display:block;color:#8993a8;font-size:13px;padding:0 3px 22px}
+  body:not(.app-open) .stats,body:not(.app-open) #content>.section-head:last-of-type,body:not(.app-open) #content>.table{display:none!important}
+  body:not(.app-open) #content>.section-head:first-of-type{margin:2px 3px 17px}
+  body:not(.app-open) #content>.section-head:first-of-type h2{font-size:17px;font-weight:700}
+  body:not(.app-open) #content>.section-head:first-of-type span{font-size:11px}
+  body:not(.app-open) .app-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 9px;padding:0 1px}
+  body:not(.app-open) .app-card{appearance:none;-webkit-appearance:none;min-width:0;min-height:0;height:auto;padding:0 2px 7px;border:0;background:transparent;box-shadow:none;border-radius:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;color:#f3f5fa;cursor:pointer}
+  body:not(.app-open) .app-card:hover{transform:none;border:0}
+  body:not(.app-open) .app-card .app-icon{width:58px;height:58px;margin:0;border-radius:17px;display:grid;place-items:center;background:linear-gradient(145deg,#8e7cff,#4a67bb);box-shadow:0 5px 14px #0007;color:#fff;font-size:29px;font-weight:500}
+  body:not(.app-open) .app-card:nth-child(2) .app-icon{background:linear-gradient(145deg,#56b8f4,#1684d2)}
+  body:not(.app-open) .app-card:nth-child(3) .app-icon{background:linear-gradient(145deg,#6d78ff,#4244a6)}
+  body:not(.app-open) .app-card:nth-child(4) .app-icon{background:linear-gradient(145deg,#ff9c54,#ed4e35)}
+  body:not(.app-open) .app-card:nth-child(5) .app-icon{background:linear-gradient(145deg,#54d4b3,#168c81)}
+  body:not(.app-open) .app-card:nth-child(6) .app-icon{background:linear-gradient(145deg,#d28af7,#8054d6)}
+  body:not(.app-open) .app-card b{font-size:11px;line-height:1.25;font-weight:600;max-width:100%;overflow-wrap:anywhere}
+  body:not(.app-open) .app-card p{display:none}
+  .ios-home-indicator{position:fixed;z-index:130;left:0;right:0;bottom:0;height:26px;border:0;background:#080b13;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+  .ios-home-indicator span{display:block;width:108px;height:4px;border-radius:4px;background:#f5f5f7}
+  .mobile-app-screen{min-height:calc(100dvh - 68px);margin:0 -18px;background:#0b101c;color:#eef3ff}
+  .mobile-app-header{height:62px;display:flex;align-items:center;gap:14px;padding:0 17px;background:#101827;border-bottom:1px solid #253247;position:sticky;top:42px;z-index:30}
+  .mobile-back{width:36px;height:36px;border:0;border-radius:50%;background:#202d43;color:#fff;font-size:30px;line-height:25px;cursor:pointer}
+  .mobile-app-header>div{display:flex;flex-direction:column;gap:2px}
+  .mobile-app-header>div b{font-size:16px}
+  .mobile-app-header>div small{font-size:8px;letter-spacing:1.5px;color:#8995aa}
+  .mobile-app-balance{margin-left:auto;font:500 11px 'DM Mono',monospace;color:#aab6cb}
+  .mobile-app-content{padding:17px;overflow-x:hidden}
+  .mobile-app-content .page-intro{margin:0 0 18px;font-size:12px}
+  .mobile-app-content .grid{gap:11px}
+  .mobile-app-content .card{border-radius:16px}
+  .mobile-app-content .section-head{margin:20px 0 12px}
+  body.app-open .main:before,body.app-open #content:before{display:none}
+  body.app-open .main{padding-top:0}
+  body.app-open #content{min-height:calc(100dvh - 68px)}
+  body.app-open .mobile-app-screen{padding-bottom:36px}
+  body.x-mode .mobile-app-screen{background:#000;color:#e7e9ea;min-height:calc(100dvh - 68px)}
+  body.x-mode .mobile-app-header{background:#000;color:#e7e9ea;border-color:#202327}
+  body.x-mode .mobile-back{background:#171c24}
+  body.x-mode .mobile-app-balance{color:#71767b}
+  body.x-mode .x-bottom-nav{bottom:26px}
+  body.x-mode .x-fab{bottom:112px}
+  body.x-mode .x-app{padding-bottom:95px}
+  body.x-mode .x-profile-view{top:42px;bottom:26px}
+}
+@media(max-width:390px){
+  body:not(.app-open) .app-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 5px}
+  body:not(.app-open) .app-card .app-icon{width:53px;height:53px;border-radius:15px}
+  .mobile-app-content{padding:14px}
+}
