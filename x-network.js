@@ -28,7 +28,9 @@
     trash: '<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>',
     back: '<path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>',
     send: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>'
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    share: '<path d="M12 16V3"/><path d="m7 8 5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+    at: '<circle cx="12" cy="12" r="9"/><path d="M16 12a4 4 0 1 1-1-2.65V13a2 2 0 0 0 4 0v-1"/>'
   };
   const ic = (n, s) => '<svg class="xn-ic" width="' + (s || 20) + '" height="' + (s || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[n] + '</svg>';
 
@@ -52,6 +54,50 @@
     const sz = size || 40;
     const hue = ([...(handle || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) * 37) % 360;
     return '<span class="xn-av" style="--h:' + hue + ';width:' + sz + 'px;height:' + sz + 'px;font-size:' + Math.round(sz * 0.42) + 'px">' + esc(((name || handle || '?') + '').trim().charAt(0).toUpperCase()) + '</span>';
+  }
+
+  function shareUrl(type, value) {
+    const url = new URL('/api/share', window.location.origin);
+    url.searchParams.set('type', type);
+    if (type === 'profile') url.searchParams.set('handle', value);
+    else url.searchParams.set('id', String(value));
+    return url.toString();
+  }
+
+  async function shareContent(url, title, text) {
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url }); return; }
+      catch (err) { if (err && err.name === 'AbortError') return; }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(url);
+      else {
+        const input = document.createElement('textarea');
+        input.value = url; input.style.position = 'fixed'; input.style.opacity = '0';
+        document.body.appendChild(input); input.select();
+        const copied = document.execCommand('copy'); input.remove();
+        if (!copied) throw new Error('Clipboard tidak tersedia');
+      }
+      toast('Link berhasil disalin');
+    } catch (err) { toast('Tidak bisa membagikan link. Salin manual: ' + url); }
+  }
+
+  function syncRouteUrl(view, params, replace) {
+    const url = new URL(window.location.href);
+    ['x', 'u', 'id'].forEach((key) => url.searchParams.delete(key));
+    if (view === 'profile' && params && params.handle) {
+      url.searchParams.set('x', 'profile'); url.searchParams.set('u', params.handle);
+    } else if (view === 'thread' && params && params.id) {
+      url.searchParams.set('x', 'post'); url.searchParams.set('id', params.id);
+    }
+    window.history[replace ? 'replaceState' : 'pushState']({ xn: true }, '', url);
+  }
+
+  function readSharedRoute() {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('x') === 'profile' && /^[a-z0-9_]{3,20}$/i.test(q.get('u') || '')) return { view: 'profile', params: { handle: q.get('u').toLowerCase() } };
+    if (q.get('x') === 'post' && /^[1-9][0-9]*$/.test(q.get('id') || '')) return { view: 'thread', params: { id: q.get('id') } };
+    return null;
   }
 
   function toast(msg) {
@@ -82,14 +128,15 @@
       '<div class="xn-body"><div class="xn-head"><a href="#" class="xn-name" data-act="profile" data-handle="' + esc(p.handle) + '">' + esc(p.display_name || p.handle) + '</a>' +
       '<span class="xn-handle">@' + esc(p.handle) + '</span><span class="xn-dot">·</span><time>' + ago(p.created_at) + '</time></div>' +
       '<div class="xn-text">' + rich(p.body) + '</div>' +
-      '<div class="xn-acts">' + actBtn('reply', 'comment', p.reply_count, false) + actBtn('repost', 'repeat', p.repost_count, p.reposted) + actBtn('like', 'heart', p.like_count, p.liked) +
+      '<div class="xn-acts">' + (XN.uid ? actBtn('reply', 'comment', p.reply_count, false) + actBtn('repost', 'repeat', p.repost_count, p.reposted) + actBtn('like', 'heart', p.like_count, p.liked) : '') +
+      '<button class="xn-act share" data-act="sharepost" data-pid="' + p.id + '" aria-label="Bagikan postingan" title="Bagikan postingan">' + ic('share', 17) + '</button>' +
       (mine ? '<button class="xn-act del" data-act="del" aria-label="Hapus">' + ic('trash', 17) + '</button>' : '') +
       '</div></div></div></article>';
   }
 
   function composer(placeholder, label, parent) {
     return '<form class="xn-compose" data-parent="' + (parent || '') + '">' + avatar(xProfile && xProfile.handle, xProfile && xProfile.display_name) +
-      '<div class="xn-cbody"><textarea maxlength="500" rows="2" placeholder="' + placeholder + '"></textarea>' +
+      '<div class="xn-cbody"><textarea maxlength="500" rows="2" placeholder="' + placeholder + '"></textarea><div class="xn-mention-suggest" hidden></div>' +
       '<div class="xn-cfoot"><small class="xn-count">500</small><button class="button" type="submit" disabled>' + label + '</button></div></div></form>';
   }
 
@@ -170,7 +217,7 @@
     const { data: replies } = await xClient.from('x_post_view').select('*').eq('parent_id', id).order('created_at', { ascending: true }).limit(100);
     if (tok !== XN.tok) return;
     $('xn-thread').innerHTML = (p.parent_id ? '<a href="#" class="xn-replying" data-act="openpid" data-pid="' + p.parent_id + '">← Lihat postingan asli</a>' : '') +
-      postCard(p, { big: true }) + composer('Balas postingan ini', 'Balas', p.id) +
+      postCard(p, { big: true }) + (XN.uid ? composer('Balas postingan ini', 'Balas', p.id) : '<div class="xn-signin"><span>Masuk ke MEMEVERSE untuk membalas postingan.</span><button class="button secondary" data-act="signin">Masuk</button></div>') +
       '<div class="xn-list">' + ((replies || []).map((r) => postCard(r)).join('') || empty('Belum ada balasan.')) + '</div>';
     if (XN.params.focus) { const ta = main().querySelector('textarea'); if (ta) ta.focus(); }
   }
@@ -185,8 +232,8 @@
     const me = pr.user_id === XN.uid;
     main().innerHTML = top(esc(pr.display_name || pr.handle), true) +
       '<div class="xn-phead"><div class="xn-prow">' + avatar(pr.handle, pr.display_name, 76) +
-      '<div class="xn-pbtns">' + (me ? '<button class="button secondary" data-act="editprofile">Edit profil</button>' :
-        '<button class="button secondary xn-iconbtn" data-act="chat" data-uid="' + pr.user_id + '" aria-label="Kirim pesan">' + ic('mail', 18) + '</button>' + followBtn(pr.user_id)) + '</div></div>' +
+      '<div class="xn-pbtns"><button class="button secondary xn-iconbtn" data-act="shareprofile" data-handle="' + esc(pr.handle) + '" aria-label="Bagikan profil" title="Bagikan profil">' + ic('share', 17) + '</button>' + (me ? '<button class="button secondary" data-act="editprofile">Edit profil</button>' :
+        (XN.uid ? '<button class="button secondary xn-iconbtn" data-act="chat" data-uid="' + pr.user_id + '" aria-label="Kirim pesan">' + ic('mail', 18) + '</button>' + followBtn(pr.user_id) : '<button class="button secondary" data-act="signin">Masuk untuk berinteraksi</button>')) + '</div></div>' +
       '<h2>' + esc(pr.display_name || pr.handle) + '</h2><div class="xn-handle">@' + esc(pr.handle) + '</div>' +
       (pr.bio ? '<p class="xn-bio">' + rich(pr.bio) + '</p>' : '') +
       '<div class="xn-counts"><span><b data-fc="' + pr.user_id + '">' + pr.followers_count + '</b> Pengikut</span><span><b>' + pr.following_count + '</b> Mengikuti</span><span><b>' + pr.posts_count + '</b> Postingan</span></div>' +
@@ -222,8 +269,8 @@
       '<h3 class="xn-h3">Postingan</h3><div class="xn-list">' + ((po.data || []).map((p) => postCard(p)).join('') || empty('Tidak ada postingan untuk "' + esc(q) + '".')) + '</div>';
   }
 
-  const NOTIF_TXT = { like: 'menyukai postinganmu', repost: 'me-repost postinganmu', reply: 'membalas postinganmu', follow: 'mulai mengikuti kamu' };
-  const NOTIF_IC = { like: 'heart', repost: 'repeat', reply: 'comment', follow: 'user' };
+  const NOTIF_TXT = { like: 'menyukai postinganmu', repost: 'me-repost postinganmu', reply: 'membalas postinganmu', follow: 'mulai mengikuti kamu', mention: 'menyebut kamu dalam postingan' };
+  const NOTIF_IC = { like: 'heart', repost: 'repeat', reply: 'comment', follow: 'user', mention: 'at' };
 
   async function vNotif() {
     const tok = ++XN.tok;
@@ -324,7 +371,7 @@
     if (!main()) return;
     const root = $('xn-root');
     root.classList.toggle('chatmode', XN.view === 'chat');
-    $('xn-nav').innerHTML = navHTML(); updateBadges();
+    const nav = $('xn-nav'); if (nav) nav.innerHTML = navHTML(); updateBadges();
     const views = { home: vHome, explore: vExplore, notif: vNotif, dm: vDM, chat: vChat, thread: vThread, profile: vProfile };
     Promise.resolve((views[XN.view] || vHome)()).catch((e) => { console.error(e); toast('Terjadi kesalahan: ' + (e.message || e)); });
   }
@@ -334,12 +381,13 @@
     if (opts.reset) XN.stack = [];
     else if (!opts.replace) XN.stack.push({ view: XN.view, params: XN.params, feedTab: XN.feedTab, profileTab: XN.profileTab });
     XN.view = view; XN.params = params || {};
+    syncRouteUrl(view, XN.params, !!opts.replace);
     render(); window.scrollTo(0, 0);
   }
 
   function xnBack() {
     const prev = XN.stack.pop();
-    if (prev) { XN.view = prev.view; XN.params = prev.params; XN.feedTab = prev.feedTab; XN.profileTab = prev.profileTab; render(); }
+    if (prev) { XN.view = prev.view; XN.params = prev.params; XN.feedTab = prev.feedTab; XN.profileTab = prev.profileTab; syncRouteUrl(XN.view, XN.params, true); render(); }
     else xnGo('home', {}, { reset: true });
   }
 
@@ -390,18 +438,24 @@
   }
 
   async function mount() {
-    if (!xClient || !xUser || !$('xn-root')) return;
-    if (XN.uid && XN.uid !== xUser.id) teardown();
-    XN.uid = xUser.id;
-    if (!xProfile) {
-      const { data } = await xClient.from('x_profiles').select('*').eq('user_id', XN.uid).maybeSingle();
-      xProfile = data;
-    }
+    if (!xClient || !$('xn-root')) return;
     const root = $('xn-root');
-    root.innerHTML = '<nav class="xn-nav" id="xn-nav"></nav><section class="xn-main" id="xn-main"></section><aside class="xn-side" id="xn-side"></aside>';
-    const { data: f } = await xClient.from('x_follows').select('following_id').eq('follower_id', XN.uid);
-    XN.following = new Set((f || []).map((r) => r.following_id));
-    render(); loadSide(); refreshCounts(); subscribe();
+    if (xUser) {
+      if (XN.uid && XN.uid !== xUser.id) teardown();
+      XN.uid = xUser.id;
+      if (!xProfile) {
+        const { data } = await xClient.from('x_profiles').select('*').eq('user_id', XN.uid).maybeSingle();
+        xProfile = data;
+      }
+      root.innerHTML = '<nav class="xn-nav" id="xn-nav"></nav><section class="xn-main" id="xn-main"></section><aside class="xn-side" id="xn-side"></aside>';
+      const { data: f } = await xClient.from('x_follows').select('following_id').eq('follower_id', XN.uid);
+      XN.following = new Set((f || []).map((r) => r.following_id));
+      render(); loadSide(); refreshCounts(); subscribe();
+    } else {
+      XN.uid = null; XN.following = new Set();
+      root.innerHTML = '<section class="xn-main xn-public" id="xn-main"></section>';
+      render();
+    }
   }
 
   /* ---------- actions ---------- */
@@ -461,6 +515,24 @@
         case 'del': await deletePost(card); break;
         case 'profile': xnGo('profile', { handle: el.dataset.handle }); break;
         case 'tag': xnGo('explore', { q: el.dataset.q }); break;
+        case 'shareprofile': await shareContent(shareUrl('profile', el.dataset.handle), 'MEMEVERSE profile', 'Lihat profil @' + el.dataset.handle + ' di MEMEVERSE.'); break;
+        case 'sharepost': await shareContent(shareUrl('post', el.dataset.pid), 'MEMEVERSE post', 'Lihat postingan ini di MEMEVERSE.'); break;
+        case 'signin': {
+          const u = new URL(window.location.href); ['x', 'u', 'id'].forEach((k) => u.searchParams.delete(k));
+          window.history.pushState({}, '', u); go('x'); break;
+        }
+        case 'insertmention': {
+          const form = el.closest('.xn-compose'), ta = form && form.querySelector('textarea');
+          if (!form || !ta) break;
+          const start = Number(form.dataset.mentionStart || Math.max(0, ta.selectionStart - 1));
+          const end = ta.selectionStart;
+          ta.value = ta.value.slice(0, start) + '@' + el.dataset.handle + ' ' + ta.value.slice(end);
+          const pos = start + el.dataset.handle.length + 2; ta.focus(); ta.setSelectionRange(pos, pos);
+          form.querySelector('.xn-mention-suggest').hidden = true;
+          form.querySelector('.xn-count').textContent = 500 - ta.value.length;
+          form.querySelector('button[type="submit"]').disabled = !ta.value.trim();
+          break;
+        }
         case 'follow': await toggleFollow(el); break;
         case 'chat': xnGo('chat', { uid: el.dataset.uid }); break;
         case 'more': el.disabled = true; await fillFeed({ ...XN.feedOpts, before: XN.cursor }, true, XN.tok); break;
@@ -475,13 +547,38 @@
     } catch (err) { console.error(err); toast('Terjadi kesalahan: ' + (err.message || err)); }
   });
 
+  let mentionLookupToken = 0, mentionLookupTimer = null;
+  async function suggestMentions(ta) {
+    const form = ta.closest('.xn-compose'), box = form && form.querySelector('.xn-mention-suggest');
+    if (!form || !box || !XN.uid) return;
+    const before = ta.value.slice(0, ta.selectionStart);
+    const match = before.match(/(?:^|\\s)@([A-Za-z0-9_]{1,20})$/);
+    if (!match) { box.hidden = true; return; }
+    const prefix = match[1].toLowerCase();
+    form.dataset.mentionStart = String(before.length - prefix.length - 1);
+    const token = ++mentionLookupToken;
+    clearTimeout(mentionLookupTimer);
+    mentionLookupTimer = setTimeout(async () => {
+      const { data, error } = await xClient.from('x_profiles').select('user_id,handle,display_name').ilike('handle', prefix + '%').neq('user_id', XN.uid).order('handle').limit(6);
+      if (token !== mentionLookupToken || !box.isConnected) return;
+      if (error || !data || !data.length) { box.hidden = true; return; }
+      box.innerHTML = data.map((p) => '<button type="button" class="xn-mention-option" data-act="insertmention" data-handle="' + esc(p.handle) + '">' + avatar(p.handle, p.display_name, 28) + '<span><b>' + esc(p.display_name || p.handle) + '</b><small>@' + esc(p.handle) + '</small></span></button>').join('');
+      box.hidden = false;
+    }, 140);
+  }
+
   content.addEventListener('input', (e) => {
     const ta = e.target;
     if (ta.tagName !== 'TEXTAREA' || !ta.closest('.xn-compose')) return;
     const f = ta.closest('.xn-compose');
     f.querySelector('.xn-count').textContent = 500 - ta.value.length;
-    f.querySelector('button').disabled = !ta.value.trim();
+    f.querySelector('button[type="submit"]').disabled = !ta.value.trim();
     ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 220) + 'px';
+    suggestMentions(ta);
+  });
+
+  content.addEventListener('click', (e) => {
+    if (e.target.closest('.xn-mention-option')) e.preventDefault();
   });
 
   content.addEventListener('keydown', (e) => {
@@ -534,10 +631,24 @@
 
   /* ---------- hook into app.js ---------- */
   window.xNetworkPage = function () {
-    if (!xClient || !xUser) { teardown(); return legacyPage(); }
+    if (!xClient) return legacyPage();
+    const route = readSharedRoute();
+    if (!xUser && !route) { teardown(); return legacyPage(); }
+    if (route) { XN.view = route.view; XN.params = route.params; XN.stack = []; }
     return '<div id="xn-root" class="xn"></div>';
   };
   window.xLoadPosts = function () { mount(); };
   // Session may already have been restored before this script ran.
-  if (xUser && document.querySelector('.nav-item.active') && document.querySelector('.nav-item.active').dataset.page === 'x') go('x');
+  window.addEventListener('popstate', () => {
+    if (document.querySelector('.nav-item.active')?.dataset.page !== 'x' || !$('xn-root')) return;
+    const route = readSharedRoute(); XN.stack = [];
+    XN.view = route ? route.view : 'home'; XN.params = route ? route.params : {};
+    render();
+  });
+  const initialSharedRoute = readSharedRoute();
+  if (initialSharedRoute) {
+    XN.view = initialSharedRoute.view; XN.params = initialSharedRoute.params;
+    go('x');
+    if (!xUser) queueMicrotask(mount);
+  } else if (xUser && document.querySelector('.nav-item.active') && document.querySelector('.nav-item.active').dataset.page === 'x') go('x');
 })();
