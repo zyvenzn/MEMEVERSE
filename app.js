@@ -67,7 +67,7 @@ x:()=>`<div class="x-app" id="x-app">
   <nav class="x-bottom-nav" aria-label="Main navigation">
     <button class="active" onclick="setXNav(this,'Home')" aria-label="Home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
     <button onclick="setXNav(this,'Search')" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16.2 16.2 5 5"/></svg></button>
-    <button onclick="setXNav(this,'Bookmarks')" aria-label="Bookmarks"><svg viewBox="0 0 24 24"><path d="M4 18 18 4M6 5c6-3 13 1 13 7s-7 10-13 7"/></svg></button>
+    <button onclick="setXNav(this,'Bookmarks')" aria-label="Bookmarks"><svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></button>
     <button onclick="setXNav(this,'Notifications')" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     <button onclick="setXNav(this,'Messages')" aria-label="Messages"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 6 8 7 8-7"/></svg></button>
   </nav>
