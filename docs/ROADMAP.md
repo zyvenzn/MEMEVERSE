@@ -11,6 +11,7 @@ Status snapshot: 2026-11-03. Completion markers reflect inspected code or live m
 - [x] Supabase email/password signup, sign-in, session restoration, sign-out, password recovery, and password update UI.
 - [x] Profile editing and private birthday storage.
 - [x] RLS enabled on all 11 audited primary public tables.
+- [x] Header USDV balance reads the authenticated user's persisted wallet rather than local demo state.
 - [ ] Verify Auth redirects, email confirmation, and production SMTP.
 - [ ] Tighten excess anon table grants and optimize remaining RLS policy expressions.
 
