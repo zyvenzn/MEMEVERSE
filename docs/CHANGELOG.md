@@ -7,3 +7,9 @@
 - Inspected Vercel project and latest Stage 2 deployment.
 - Documented architecture, schema, security findings, deployment, testing, roadmap, and known issues.
 - No production deployment, destructive database operation, PR merge, or credential change performed.
+
+## 2026-11-03 — Wallet display integrity
+- Changed the global balance header to load the signed-in user's USDV balance from the primary Supabase wallets table.
+- Anonymous sessions now see a sign-in prompt instead of a hardcoded $10,000 balance.
+- Kept local sandbox credits separate and explicitly labeled as demo-only.
+- Added the work/** branch pattern to GitHub Actions push validation.
