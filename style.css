@@ -369,3 +369,14 @@ body{background:radial-gradient(ellipse at 70% -20%,#25154b 0,transparent 38%),#
   .sidebar{display:flex}
   .main{min-width:0}
 }
+
+/* Stage 2 — live X feed states and controls */
+.x-feed-state{padding:28px 20px;text-align:center;color:#8d98aa;font-size:14px;border-bottom:1px solid #252a33}
+.x-follow-button{margin-left:auto;border:1px solid #687386;border-radius:18px;padding:5px 11px;background:#f3f4f6;color:#111827;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.x-follow-button.is-following{background:transparent;color:#e6e9ef;border-color:#3b4656}
+.x-action-active{color:#37a7f5!important}
+.x-post-heading{min-width:0}
+@media(max-width:800px){
+ .x-follow-button{padding:4px 8px;font-size:10px}
+ .x-feed-state{padding:24px 14px;font-size:13px}
+}
