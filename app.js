@@ -1,4 +1,4 @@
-const state={balance:10000,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[{user:"@marketwatch",text:"Welcome to MEMEVERSE. The virtual economy is open for exploration.",time:"Just now"}],holdings:[],tokens:[],orders:[]};
+const state={balance:10000,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[],xFeedMode:"For you",xRealtimeChannel:null,xFeedLoading:false,holdings:[],tokens:[],orders:[]};
 const money=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const content=document.getElementById("content"), title=document.getElementById("page-title");
 function renderOverview(){
@@ -62,22 +62,12 @@ x:()=>`<div class="x-app" id="x-app">
       <div class="x-compose-footer"><span id="x-char-count">500</span><button class="x-post-button" onclick="addPost()">Posting</button></div>
     </div>
   </section>
-  <div class="x-feed" id="feed">${state.posts.map(xPostHTML).join("")}
-    <article class="x-post x-promoted">
-      <div class="x-post-avatar x-ad-avatar">M</div>
-      <div class="x-post-main">
-        <div class="x-post-heading"><b>MEMEVERSE</b><span class="x-verified">✓</span><span class="x-handle">@memeverse</span><span class="x-dot">·</span><span class="x-time">Promoted</span><span class="x-more">···</span></div>
-        <p>Discover a new virtual economy. Connect, create, and explore with players across MEMEVERSE.</p>
-        <div class="x-ad-art"><div class="x-ad-brand">MEMEVERSE</div><strong>YOUR WORLD.<br>YOUR ECONOMY.</strong><span>Explore the universe</span></div>
-        <div class="x-actions"><button onclick="demoNotice()">♡ <span>12</span></button><button onclick="demoNotice()">⇄ <span>4</span></button><button onclick="demoNotice()">♡ <span>28</span></button><button onclick="demoNotice()">▥ <span>1.2K</span></button><button onclick="demoNotice()">♧</button><button onclick="demoNotice()">↗</button></div>
-      </div>
-    </article>
-  </div>
+  <div class="x-feed" id="feed"><div class="x-feed-state">Loading MEMEVERSE posts…</div></div>
   <button class="x-fab" onclick="document.getElementById('post-input').focus()" aria-label="Compose post">＋</button>
   <nav class="x-bottom-nav" aria-label="Main navigation">
     <button class="active" onclick="setXNav(this,'Home')" aria-label="Home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
     <button onclick="setXNav(this,'Search')" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16.2 16.2 5 5"/></svg></button>
-    <button onclick="setXNav(this,'Grok')" aria-label="Grok"><svg viewBox="0 0 24 24"><path d="M4 18 18 4M6 5c6-3 13 1 13 7s-7 10-13 7"/></svg></button>
+    <button onclick="setXNav(this,'Bookmarks')" aria-label="Bookmarks"><svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></button>
     <button onclick="setXNav(this,'Notifications')" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
     <button onclick="setXNav(this,'Messages')" aria-label="Messages"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 6 8 7 8-7"/></svg></button>
   </nav>
@@ -117,9 +107,108 @@ pump:()=>`<p class="page-intro">A fictional token launchpad with simulated balan
 trading:()=>`<p class="page-intro">Market prices below are mock data for interface testing, not real-time quotes. Real market feeds will be connected in a later phase.</p><div class="card"><div class="section-head"><h2>Market overview</h2><span>DEMO DATA</span></div>${marketTable()}<div class="notice">Trading execution, chart history, order book, stop loss and take profit require the secure backend. This screen is a frontend prototype.</div></div>`,
 market:()=>`<p class="page-intro">A player-to-player marketplace for virtual goods and services.</p><div class="grid app-grid"><div class="card"><div class="app-icon">📱</div><b>Virtual Telegram number</b><p>Fictional in-game phone identity.</p><span class="tag">$5</span></div><div class="card"><div class="app-icon">✦</div><b>X Premium</b><p>Premium profile features and badge.</p><span class="tag">$15</span></div><div class="card"><div class="app-icon">◉</div><b>Discord template</b><p>Ready-made server structure.</p><span class="tag">$20+</span></div></div><div class="section-head"><h2>Player services</h2></div><div class="card"><p class="muted">Player listings, escrow, delivery confirmation and dispute handling will be added after account and backend systems are ready.</p></div>`
 };
-function xPostHTML(p){return `<article class="x-post"><div class="x-post-avatar">${esc((p.user||"M").replace("@","").slice(0,1).toUpperCase())}</div><div class="x-post-main"><div class="x-post-heading"><b>${esc((p.displayName||p.user||"Player").replace("@",""))}</b><span class="x-handle">${esc(p.user||"@player")}</span><span class="x-dot">·</span><span class="x-time">${esc(p.time||"now")}</span><button class="x-more" aria-label="More" onclick="demoNotice()">···</button></div><p>${esc(p.text)}</p><div class="x-actions"><button onclick="demoNotice()" aria-label="Reply">▢ <span>0</span></button><button onclick="demoNotice()" aria-label="Repost">⇄ <span>0</span></button><button onclick="demoNotice()" aria-label="Like">♡ <span>0</span></button><button onclick="demoNotice()" aria-label="Views">▥ <span>0</span></button><button onclick="demoNotice()" aria-label="Bookmark">♧</button><button onclick="demoNotice()" aria-label="Share">↗</button></div></div></article>`}
-function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto")demoNotice()}
-function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home")return;if(label==="Profile")openXProfile();else demoNotice()}
+function xPostHTML(p){
+ const id=esc(p.id||"");
+ const initial=esc((p.displayName||p.handle||"M").slice(0,1).toUpperCase());
+ const avatar=p.avatarUrl?("<div class=\"x-post-avatar\" style=\"background-image:url(\'"+esc(p.avatarUrl)+"\');background-size:cover;background-position:center\"></div>"):"<div class=\"x-post-avatar\">"+initial+"</div>";
+ const follow=p.canFollow?("<button class=\"x-follow-button "+(p.following?"is-following":"")+"\" onclick=\"toggleXFollow(\'"+id+"\',\'"+esc(p.authorId)+"\')\">"+(p.following?"Following":"Follow")+"</button>"):"";
+ return "<article class=\"x-post\" data-post-id=\""+id+"\">"+avatar+"<div class=\"x-post-main\"><div class=\"x-post-heading\"><b>"+esc(p.displayName||p.handle||"Player")+"</b><span class=\"x-handle\">@"+esc(p.handle||"player")+"</span><span class=\"x-dot\">·</span><span class=\"x-time\">"+esc(p.time||"now")+"</span>"+follow+"<button class=\"x-more\" aria-label=\"More\" onclick=\"demoNotice()\">···</button></div><p>"+esc(p.text)+"</p><div class=\"x-actions\"><button onclick=\"replyToXPost(\'"+id+"\')\" aria-label=\"Reply\">▢ <span>"+(p.replyCount||0)+"</span></button><button class=\""+(p.reposted?"x-action-active":"")+"\" onclick=\"toggleXAction(\'repost\',\'"+id+"\')\" aria-label=\"Repost\">⇄ <span>"+(p.repostCount||0)+"</span></button><button class=\""+(p.liked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'like\',\'"+id+"\')\" aria-label=\"Like\">♡ <span>"+(p.likeCount||0)+"</span></button><button aria-label=\"Views\">▥ <span>—</span></button><button class=\""+(p.bookmarked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'bookmark\',\'"+id+"\')\" aria-label=\"Bookmark\">♧</button><button onclick=\"navigator.clipboard?.writeText(location.href)\" aria-label=\"Share\">↗</button></div></div></article>";
+}
+
+function setXFeedMessage(message){const feed=document.getElementById("feed");if(feed)feed.innerHTML="<div class=\"x-feed-state\">"+esc(message)+"</div>"}
+function relativeXTime(value){const ms=Date.now()-new Date(value).getTime();if(!Number.isFinite(ms))return "now";const m=Math.max(0,Math.floor(ms/60000));if(m<1)return "now";if(m<60)return m+"m";const h=Math.floor(m/60);if(h<24)return h+"h";return Math.floor(h/24)+"d"}
+async function loadXFeed(mode=state.xFeedMode||"For you"){
+ const feed=document.getElementById("feed");if(!feed)return;const client=xClient();if(!client){setXFeedMessage("Supabase belum terhubung.");return}
+ if(state.xFeedLoading)return;state.xFeedLoading=true;feed.innerHTML="<div class=\"x-feed-state\">Loading MEMEVERSE posts…</div>";
+ try{
+  const {data:{user}}=await client.auth.getUser();
+  let query=client.from("x_posts").select("id,author_id,body,created_at,profile:profiles!x_posts_author_id_fkey(handle,display_name,avatar_url)").order("created_at",{ascending:false}).limit(50);
+  if(mode==="Following"){
+   if(!user){setXFeedMessage("Login untuk melihat feed Following.");return}
+   const {data:follows,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id);if(error)throw error;
+   const ids=(follows||[]).map(x=>x.followed_id);if(!ids.length){setXFeedMessage("Belum ada akun yang kamu ikuti. Mulai follow pemain lain!");return}
+   query=query.in("author_id",ids)
+  }
+  if(mode==="Bookmarks"){
+   if(!user){setXFeedMessage("Login untuk melihat bookmark.");return}
+   const {data:marks,error}=await client.from("x_bookmarks").select("post_id").eq("user_id",user.id).order("created_at",{ascending:false});if(error)throw error;
+   const ids=(marks||[]).map(x=>x.post_id);if(!ids.length){setXFeedMessage("Belum ada postingan yang disimpan.");return}
+   query=query.in("id",ids)
+  }
+  const {data:posts,error}=await query;if(error)throw error;
+  const ids=(posts||[]).map(p=>p.id);if(!ids.length){setXFeedMessage("Belum ada postingan. Jadilah yang pertama berbagi sesuatu!");return}
+  let likes=[],reposts=[],replies=[],marks=[],follows=[];
+  if(user){
+   const results=await Promise.all([
+    client.from("x_likes").select("post_id,user_id").in("post_id",ids),
+    client.from("x_reposts").select("post_id,user_id").in("post_id",ids),
+    client.from("x_replies").select("id,post_id").in("post_id",ids),
+    client.from("x_bookmarks").select("post_id").eq("user_id",user.id).in("post_id",ids),
+    client.from("x_follows").select("followed_id").eq("follower_id",user.id)
+   ]);
+   for(const r of results)if(r.error)throw r.error;
+   [likes,reposts,replies,marks,follows]=results.map(r=>r.data||[])
+  }else{
+   const r=await client.from("x_replies").select("id,post_id").in("post_id",ids);if(!r.error)replies=r.data||[]
+  }
+  const count=(arr,id)=>arr.filter(x=>x.post_id===id).length;
+  const liked=new Set(likes.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
+  const reposted=new Set(reposts.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
+  const bookmarked=new Set(marks.map(x=>x.post_id));
+  const following=new Set(follows.map(x=>x.followed_id));
+  state.posts=(posts||[]).map(p=>({
+   id:p.id,authorId:p.author_id,handle:p.profile?.handle||"player",
+   displayName:p.profile?.display_name||p.profile?.handle||"Player",
+   avatarUrl:p.profile?.avatar_url||null,text:p.body,time:relativeXTime(p.created_at),
+   likeCount:count(likes,p.id),repostCount:count(reposts,p.id),replyCount:count(replies,p.id),
+   liked:liked.has(p.id),reposted:reposted.has(p.id),bookmarked:bookmarked.has(p.id),
+   following:following.has(p.author_id),canFollow:!!user&&p.author_id!==user.id
+  }));
+  feed.innerHTML=state.posts.map(xPostHTML).join("");
+  if(!state.xRealtimeChannel){
+   state.xRealtimeChannel=client.channel("x-network-live-feed")
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"x_posts"},()=>{
+     if(document.body.dataset.currentPage==="x"&&state.xFeedMode==="For you")loadXFeed("For you")
+    }).subscribe()
+  }
+ }catch(error){setXFeedMessage("Gagal memuat feed: "+error.message)}
+ finally{state.xFeedLoading=false}
+}
+async function toggleXAction(action,postId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk berinteraksi dengan postingan.",true);return}
+ const tables={like:{table:"x_likes",key:"user_id"},repost:{table:"x_reposts",key:"user_id"},bookmark:{table:"x_bookmarks",key:"user_id"}};
+ const cfg=tables[action];if(!cfg)return;
+ const {data:existing,error:readError}=await client.from(cfg.table).select("post_id").eq(cfg.key,user.id).eq("post_id",postId).maybeSingle();
+ if(readError){setXFeedMessage(readError.message);return}
+ const result=existing
+  ?await client.from(cfg.table).delete().eq(cfg.key,user.id).eq("post_id",postId)
+  :await client.from(cfg.table).insert({[cfg.key]:user.id,post_id:postId});
+ if(result.error){setXFeedMessage("Aksi gagal: "+result.error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+async function replyToXPost(postId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk membalas postingan.",true);return}
+ const body=prompt("Tulis balasan (maks. 500 karakter):");if(!body?.trim())return;
+ const {error}=await client.from("x_replies").insert({post_id:postId,author_id:user.id,body:body.trim().slice(0,500)});
+ if(error){setXFeedMessage("Balasan gagal: "+error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+async function toggleXFollow(postId,authorId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk mengikuti pemain.",true);return}
+ const {data:existing,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id).eq("followed_id",authorId).maybeSingle();
+ if(error){setXFeedMessage(error.message);return}
+ const result=existing
+  ?await client.from("x_follows").delete().eq("follower_id",user.id).eq("followed_id",authorId)
+  :await client.from("x_follows").insert({follower_id:user.id,followed_id:authorId});
+ if(result.error){setXFeedMessage(result.error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+
+function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto"){demoNotice();return}state.xFeedMode=tab;loadXFeed(tab)}
+function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home"){state.xFeedMode="For you";loadXFeed("For you");return}if(label==="Bookmarks"){state.xFeedMode="Bookmarks";loadXFeed("Bookmarks");return}if(label==="Profile"){openXProfile();return}demoNotice()}
 function openXProfile(){document.getElementById("x-profile-view").hidden=false;loadXProfile()}
 function closeXProfile(){document.getElementById("x-profile-view").hidden=true;document.getElementById("x-profile-edit-view").hidden=true}
 function app(icon,name,desc,page){return `<div class="card app-card" onclick="go('${page}')"><div class="app-icon">${icon}</div><b>${name}</b><p>${desc}</p></div>`}
@@ -127,10 +216,20 @@ function postHTML(p){return `<div class="feed-item"><b>${esc(p.user)}</b> <small
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function marketTable(){return `<table class="table"><tr><th>ASSET</th><th>PRICE</th><th>24H</th><th>MARKET</th></tr><tr><td class="asset">BTC <small>Bitcoin</small></td><td>$67,420</td><td class="positive">+2.4%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">ETH <small>Ethereum</small></td><td>$3,510</td><td class="positive">+1.2%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">SOL <small>Solana</small></td><td>$182</td><td class="negative">-0.8%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">AAPL <small>Apple</small></td><td>$221</td><td class="positive">+0.6%</td><td><span class="tag">Stock</span></td></tr><tr><td class="asset">EUR/USD <small>Euro / US Dollar</small></td><td>1.0842</td><td class="negative">-0.1%</td><td><span class="tag">Forex</span></td></tr></table>`}
 function tokenList(){return state.tokens.length?state.tokens.map(t=>`<div class="feed-item"><b>${esc(t.name)} (${esc(t.symbol)})</b><p>${esc(t.desc||"Community token")} · <span class="positive">${money(t.price)}</span></p></div>`).join(""):"<p class='muted'>No tokens yet. Launch the first one.</p>"}
-function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item,.dock-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||page==="x"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";window.scrollTo(0,0)}function goHome(){go("overview")}
+function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item,.dock-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||page==="x"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";if(page==="x")loadXFeed(state.xFeedMode);window.scrollTo(0,0)}function goHome(){go("overview")}
 function updateBalance(){document.getElementById("top-balance").textContent=money(state.balance)}
 function buy(cost,item){if(state.balance<cost){alert("Saldo virtual tidak cukup.");return}state.balance-=cost;updateBalance();alert(item+" berhasil dibeli dalam demo. Saldo: "+money(state.balance));go(document.querySelector(".nav-item.active")?.dataset.page||"overview")}
-function addPost(){const el=document.getElementById("post-input");if(!el?.value.trim())return;state.posts.unshift({user:"@testtrader",displayName:"Test Trader",text:el.value.trim(),time:"now"});go("x")}
+async function addPost(){
+ const el=document.getElementById("post-input");const body=el?.value.trim();if(!body)return;
+ const client=xClient();if(!client){alert("Supabase belum tersedia.");return}
+ const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){openAuth("login");setAuthMessage("Login diperlukan untuk membuat postingan.",true);return}
+ const button=document.querySelector(".x-post-button");if(button){button.disabled=true;button.textContent="Posting…"}
+ const {error}=await client.from("x_posts").insert({author_id:user.id,body});
+ if(button){button.disabled=false;button.textContent="Posting"}
+ if(error){setXFeedMessage("Posting gagal: "+error.message);return}
+ el.value="";const count=document.getElementById("x-char-count");if(count)count.textContent="500";await loadXFeed(state.xFeedMode)
+}
+
 function createServer(){const n=document.getElementById("server-name").value.trim();if(!n)return alert("Masukkan nama server.");document.getElementById("server-list").innerHTML=`<b>◉ ${esc(n)}</b><p class="muted"># general · Server demo created</p>`}
 function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});updateBalance();go("pump")}
 function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
@@ -157,7 +256,7 @@ function switchAuthMode(){openAuth(authMode==="login"?"signup":"login")}
 async function submitAuth(event){event.preventDefault();const client=xClient();if(!client){setAuthMessage("Koneksi Supabase belum siap. Muat ulang halaman dan coba lagi.",true);return}const email=document.getElementById("auth-email").value.trim();const password=document.getElementById("auth-password").value;const displayName=document.getElementById("auth-display-name").value.trim();const button=document.getElementById("auth-submit");button.disabled=true;try{if(authMode==="signup"){if(password.length<8)throw new Error("Password minimal 8 karakter.");const {data,error}=await client.auth.signUp({email,password,options:{data:{display_name:displayName||"New Player"}}});if(error)throw error;if(data.session){setAuthMessage("Akun berhasil dibuat dan kamu sudah login.");}else{setAuthMessage("Akun dibuat. Cek email untuk verifikasi sebelum login.");}document.getElementById("auth-password").value="";}else if(authMode==="reset"){const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});if(error)throw error;setAuthMessage("Jika email terdaftar, tautan reset akan dikirim. Periksa inbox dan folder spam.");}else if(authMode==="update-password"){if(password.length<8)throw new Error("Password minimal 8 karakter.");const {error}=await client.auth.updateUser({password});if(error)throw error;setAuthMessage("Password berhasil diperbarui.");document.getElementById("auth-password").value="";}else{const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;setAuthMessage("Login berhasil.");document.getElementById("auth-password").value="";} }catch(error){setAuthMessage(error.message||"Autentikasi gagal. Coba lagi.",true)}finally{button.disabled=false}}
 async function signOutMEMEVERSE(){const client=xClient();if(!client)return;const {error}=await client.auth.signOut();if(error){alert("Gagal logout: "+error.message);return}state.xProfile={};state.xAvatarFile=null;state.xBannerFile=null;closeXProfile();setAuthMessage("Kamu sudah logout.");}
 function updateAuthUI(session){const user=session?.user;const launcher=document.getElementById("auth-launcher");if(launcher)launcher.textContent=user?(user.email||"Account")+" · Sign out":"Sign in / Create account";const account=document.getElementById("auth-account-state");if(account)account.textContent=user?"Signed in as "+(user.email||"MEMEVERSE player"):"Not signed in";const signout=document.getElementById("auth-signout");if(signout)signout.hidden=!user;const switcher=document.getElementById("auth-switch");if(switcher)switcher.hidden=!!user;const form=document.getElementById("auth-form");if(form)form.hidden=!!user;const modalTitle=document.getElementById("auth-title");if(user&&modalTitle)modalTitle.textContent="Your MEMEVERSE account";}
-function initMEMEVERSEAuth(){const client=xClient();if(!client){setAuthMessage("Supabase belum dikonfigurasi.",true);return}client.auth.onAuthStateChange((event,session)=>{window.__memeverseSession=session;updateAuthUI(session);if(event==="PASSWORD_RECOVERY")openAuth("update-password")});client.auth.getSession().then(({data,error})=>{if(error){setAuthMessage("Tidak dapat memulihkan sesi: "+error.message,true);return}window.__memeverseSession=data.session;updateAuthUI(data.session)});}
+function initMEMEVERSEAuth(){const client=xClient();if(!client){setAuthMessage("Supabase belum dikonfigurasi.",true);return}client.auth.onAuthStateChange((event,session)=>{window.__memeverseSession=session;updateAuthUI(session);if(document.body.dataset.currentPage==="x")loadXFeed(state.xFeedMode);if(event==="PASSWORD_RECOVERY")openAuth("update-password")});client.auth.getSession().then(({data,error})=>{if(error){setAuthMessage("Tidak dapat memulihkan sesi: "+error.message,true);return}window.__memeverseSession=data.session;updateAuthUI(data.session)});}
 document.getElementById("auth-form")?.addEventListener("submit",submitAuth);
 document.getElementById("auth-launcher")?.addEventListener("click",()=>{if(window.supabaseClient){const label=document.getElementById("auth-launcher").textContent;if(window.__memeverseSession?.user){signOutMEMEVERSE();return}openAuth("login")}else openAuth("login")});
 document.getElementById("auth-switch")?.addEventListener("click",()=>{if(authMode==="reset")openAuth("login");else switchAuthMode()});
