@@ -235,7 +235,7 @@ function createServer(){const n=document.getElementById("server-name").value.tri
 function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});go("pump")}
 function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
 document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});document.getElementById("mobile-dock")?.addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});
-go("overview");updateBalance();
+go("overview");
 
 // X profile editor: requires window.supabaseClient configured with the signed-in Supabase session.
 function xClient(){return window.supabaseClient||null}
