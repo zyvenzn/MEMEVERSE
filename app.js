@@ -1,4 +1,4 @@
-const state={balance:10000,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[{user:"@marketwatch",text:"Welcome to MEMEVERSE. The virtual economy is open for exploration.",time:"Just now"}],holdings:[],tokens:[],orders:[]};
+const state={balance:10000,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[],xFeedMode:"For you",xRealtimeChannel:null,xFeedLoading:false,holdings:[],tokens:[],orders:[]};
 const money=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const content=document.getElementById("content"), title=document.getElementById("page-title");
 function renderOverview(){
@@ -62,17 +62,7 @@ x:()=>`<div class="x-app" id="x-app">
       <div class="x-compose-footer"><span id="x-char-count">500</span><button class="x-post-button" onclick="addPost()">Posting</button></div>
     </div>
   </section>
-  <div class="x-feed" id="feed">${state.posts.map(xPostHTML).join("")}
-    <article class="x-post x-promoted">
-      <div class="x-post-avatar x-ad-avatar">M</div>
-      <div class="x-post-main">
-        <div class="x-post-heading"><b>MEMEVERSE</b><span class="x-verified">✓</span><span class="x-handle">@memeverse</span><span class="x-dot">·</span><span class="x-time">Promoted</span><span class="x-more">···</span></div>
-        <p>Discover a new virtual economy. Connect, create, and explore with players across MEMEVERSE.</p>
-        <div class="x-ad-art"><div class="x-ad-brand">MEMEVERSE</div><strong>YOUR WORLD.<br>YOUR ECONOMY.</strong><span>Explore the universe</span></div>
-        <div class="x-actions"><button onclick="demoNotice()">♡ <span>12</span></button><button onclick="demoNotice()">⇄ <span>4</span></button><button onclick="demoNotice()">♡ <span>28</span></button><button onclick="demoNotice()">▥ <span>1.2K</span></button><button onclick="demoNotice()">♧</button><button onclick="demoNotice()">↗</button></div>
-      </div>
-    </article>
-  </div>
+  <div class="x-feed" id="feed"><div class="x-feed-state">Loading MEMEVERSE posts…</div></div>
   <button class="x-fab" onclick="document.getElementById('post-input').focus()" aria-label="Compose post">＋</button>
   <nav class="x-bottom-nav" aria-label="Main navigation">
     <button class="active" onclick="setXNav(this,'Home')" aria-label="Home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
@@ -117,7 +107,13 @@ pump:()=>`<p class="page-intro">A fictional token launchpad with simulated balan
 trading:()=>`<p class="page-intro">Market prices below are mock data for interface testing, not real-time quotes. Real market feeds will be connected in a later phase.</p><div class="card"><div class="section-head"><h2>Market overview</h2><span>DEMO DATA</span></div>${marketTable()}<div class="notice">Trading execution, chart history, order book, stop loss and take profit require the secure backend. This screen is a frontend prototype.</div></div>`,
 market:()=>`<p class="page-intro">A player-to-player marketplace for virtual goods and services.</p><div class="grid app-grid"><div class="card"><div class="app-icon">📱</div><b>Virtual Telegram number</b><p>Fictional in-game phone identity.</p><span class="tag">$5</span></div><div class="card"><div class="app-icon">✦</div><b>X Premium</b><p>Premium profile features and badge.</p><span class="tag">$15</span></div><div class="card"><div class="app-icon">◉</div><b>Discord template</b><p>Ready-made server structure.</p><span class="tag">$20+</span></div></div><div class="section-head"><h2>Player services</h2></div><div class="card"><p class="muted">Player listings, escrow, delivery confirmation and dispute handling will be added after account and backend systems are ready.</p></div>`
 };
-function xPostHTML(p){return `<article class="x-post"><div class="x-post-avatar">${esc((p.user||"M").replace("@","").slice(0,1).toUpperCase())}</div><div class="x-post-main"><div class="x-post-heading"><b>${esc((p.displayName||p.user||"Player").replace("@",""))}</b><span class="x-handle">${esc(p.user||"@player")}</span><span class="x-dot">·</span><span class="x-time">${esc(p.time||"now")}</span><button class="x-more" aria-label="More" onclick="demoNotice()">···</button></div><p>${esc(p.text)}</p><div class="x-actions"><button onclick="demoNotice()" aria-label="Reply">▢ <span>0</span></button><button onclick="demoNotice()" aria-label="Repost">⇄ <span>0</span></button><button onclick="demoNotice()" aria-label="Like">♡ <span>0</span></button><button onclick="demoNotice()" aria-label="Views">▥ <span>0</span></button><button onclick="demoNotice()" aria-label="Bookmark">♧</button><button onclick="demoNotice()" aria-label="Share">↗</button></div></div></article>`}
+function xPostHTML(p){
+ const id=esc(p.id||"");
+ const initial=esc((p.displayName||p.handle||"M").slice(0,1).toUpperCase());
+ const avatar=p.avatarUrl?("<div class=\"x-post-avatar\" style=\"background-image:url(\'"+esc(p.avatarUrl)+"\');background-size:cover;background-position:center\"></div>"):"<div class=\"x-post-avatar\">"+initial+"</div>";
+ const follow=p.canFollow?("<button class=\"x-follow-button "+(p.following?"is-following":"")+"\" onclick=\"toggleXFollow(\'"+id+"\',\'"+esc(p.authorId)+"\')\">"+(p.following?"Following":"Follow")+"</button>"):"";
+ return "<article class=\"x-post\" data-post-id=\""+id+"\">"+avatar+"<div class=\"x-post-main\"><div class=\"x-post-heading\"><b>"+esc(p.displayName||p.handle||"Player")+"</b><span class=\"x-handle\">@"+esc(p.handle||"player")+"</span><span class=\"x-dot\">·</span><span class=\"x-time\">"+esc(p.time||"now")+"</span>"+follow+"<button class=\"x-more\" aria-label=\"More\" onclick=\"demoNotice()\">···</button></div><p>"+esc(p.text)+"</p><div class=\"x-actions\"><button onclick=\"replyToXPost(\'"+id+"\')\" aria-label=\"Reply\">▢ <span>"+(p.replyCount||0)+"</span></button><button class=\""+(p.reposted?"x-action-active":"")+"\" onclick=\"toggleXAction(\'repost\',\'"+id+"\')\" aria-label=\"Repost\">⇄ <span>"+(p.repostCount||0)+"</span></button><button class=\""+(p.liked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'like\',\'"+id+"\')\" aria-label=\"Like\">♡ <span>"+(p.likeCount||0)+"</span></button><button aria-label=\"Views\">▥ <span>—</span></button><button class=\""+(p.bookmarked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'bookmark\',\'"+id+"\')\" aria-label=\"Bookmark\">♧</button><button onclick=\"navigator.clipboard?.writeText(location.href)\" aria-label=\"Share\">↗</button></div></div></article>";
+}
 function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto")demoNotice()}
 function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home")return;if(label==="Profile")openXProfile();else demoNotice()}
 function openXProfile(){document.getElementById("x-profile-view").hidden=false;loadXProfile()}
@@ -130,7 +126,17 @@ function tokenList(){return state.tokens.length?state.tokens.map(t=>`<div class=
 function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item,.dock-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||page==="x"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";window.scrollTo(0,0)}function goHome(){go("overview")}
 function updateBalance(){document.getElementById("top-balance").textContent=money(state.balance)}
 function buy(cost,item){if(state.balance<cost){alert("Saldo virtual tidak cukup.");return}state.balance-=cost;updateBalance();alert(item+" berhasil dibeli dalam demo. Saldo: "+money(state.balance));go(document.querySelector(".nav-item.active")?.dataset.page||"overview")}
-function addPost(){const el=document.getElementById("post-input");if(!el?.value.trim())return;state.posts.unshift({user:"@testtrader",displayName:"Test Trader",text:el.value.trim(),time:"now"});go("x")}
+async function addPost(){
+ const el=document.getElementById("post-input");const body=el?.value.trim();if(!body)return;
+ const client=xClient();if(!client){alert("Supabase belum tersedia.");return}
+ const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){openAuth("login");setAuthMessage("Login diperlukan untuk membuat postingan.",true);return}
+ const button=document.querySelector(".x-post-button");if(button){button.disabled=true;button.textContent="Posting…"}
+ const {error}=await client.from("x_posts").insert({author_id:user.id,body});
+ if(button){button.disabled=false;button.textContent="Posting"}
+ if(error){setXFeedMessage("Posting gagal: "+error.message);return}
+ el.value="";const count=document.getElementById("x-char-count");if(count)count.textContent="500";await loadXFeed(state.xFeedMode)
+}
+
 function createServer(){const n=document.getElementById("server-name").value.trim();if(!n)return alert("Masukkan nama server.");document.getElementById("server-list").innerHTML=`<b>◉ ${esc(n)}</b><p class="muted"># general · Server demo created</p>`}
 function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});updateBalance();go("pump")}
 function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
