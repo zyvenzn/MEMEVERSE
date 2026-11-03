@@ -1,64 +1,45 @@
-# MEMEVERSE Starter Prototype
+# MEMEVERSE
 
-Ini adalah **prototype frontend lokal**, bukan game online yang sudah selesai.
+**MEMEVERSE — Enter the Internet's Financial Universe.**
 
-## Cara menjalankan dari Android
-1. Ekstrak `memeverse-starter.zip`.
-2. Buka folder hasil ekstrak menggunakan editor kode Android atau editor web yang mendukung HTML.
-3. Buka `index.html` melalui fitur preview/browser.
-4. Navigasikan menu di sidebar.
+MEMEVERSE is a Web3-inspired social, community, messaging, memecoin, and multi-market terminal platform. This repository is under active staged development. It is not yet a production-ready exchange or complete social platform.
 
-Jika editor tidak bisa menjalankan folder secara langsung, gunakan hosting statis seperti GitHub Pages atau Vercel setelah membuat repository.
+## Current architecture
+- Frontend: vanilla HTML, CSS, and JavaScript.
+- Hosting: Vercel.
+- Backend: Supabase Auth, PostgreSQL, Storage, Realtime, and Edge Functions.
+- Canonical backend: the Supabase project named MEMEVERSE.
+- Development baseline: work/memeverse-platform-completion, based on feature/stage-2-x-network.
 
-## Yang sudah ada
-- Dashboard responsif untuk HP.
-- Navigasi enam modul: X, Telegram, Discord, Pump.fun, Trading, Marketplace.
-- Demo saldo virtual dan pembelian.
-- Demo membuat postingan.
-- Demo membuat server Discord.
-- Demo membuat token virtual.
-- Data harga market ilustratif.
+## Current implementation
+- Email/password authentication, session restoration, password recovery, and profile editing.
+- Public player profiles with private birthday storage and profile-media uploads.
+- Database-backed X feed, following feed, likes, reposts, replies, follows, and bookmarks.
+- Realtime subscription for new X posts.
+- USDV simulated-credit wallet, ledger, and server-side simulated crypto market-order path for four crypto symbols.
+- Vercel static deployment and basic GitHub Actions JavaScript/config validation.
 
-## Yang belum ada
-- Login dan akun online.
-- Database bersama.
-- Chat/DM realtime.
-- Sinkronisasi multiplayer.
-- Feed global.
-- Wallet blockchain.
-- Market data live.
-- Trading engine yang aman.
-- Creator reward production-ready.
+## Not production complete
+MEMEVERSE Pump, Messenger, Community, and the full Trading Terminal are not complete. Current Pump, Messenger, and Community screens contain demo or placeholder behavior. USDV is simulated development credit only. The trading backend does not execute real-money or blockchain transactions. Market data coverage is limited and must not be represented as a complete live multi-market terminal.
 
-Semua saldo, harga, token, dan interaksi saat ini hanya demo di browser. Jangan gunakan untuk uang sungguhan.
+A separate legacy Supabase project named X-Network contains an older X identity/schema. It is documented as legacy and must not be merged directly into the primary app without migration work.
 
-## Rencana backend
-- Supabase Auth untuk akun.
-- PostgreSQL untuk data.
-- Row Level Security untuk akses.
-- Supabase Realtime untuk chat/feed.
-- Server-side functions untuk ledger, order, token trades, dan rewards.
-- Market data API dengan lisensi yang sesuai.
+## Documentation
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Database schema](docs/DATABASE_SCHEMA.md)
+- [Security](docs/SECURITY.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Testing](docs/TESTING.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Known issues](docs/KNOWN_ISSUES.md)
 
-## Urutan implementasi
-1. Pasang Supabase dan auth.
-2. Buat schema database dan RLS.
-3. Buat ledger virtual yang aman.
-4. Implementasikan satu modul sosial online.
-5. Tambahkan modul lain satu per satu.
-6. Bangun Pump.fun simulator dan trading engine.
+## Local development
+The frontend is static. Serve the repository root with any local static HTTP server. Configure supabase-config.js with the primary Supabase project URL and browser-safe publishable/anon key. Never put a Supabase service-role or secret key in browser code.
 
-## X player profile setup
-The X profile editor supports display name, unique username, bio, location, website, private birthday, profile photo, and banner.
+Before public signup, verify Supabase Auth redirect URLs, email confirmation, SMTP, RLS, Storage policies, and preview/production domain configuration.
 
-Before using online profile editing:
-1. Copy `supabase-config.js` and set the Supabase project URL and browser-safe publishable/anon key. Never use a service-role key in the browser.
-2. Ensure the app has a Supabase Auth sign-in flow and a signed-in session.
-3. The existing `profile-media` public bucket accepts PNG/JPG/WebP images up to 2 MB; storage policies restrict uploads to the signed-in user's folder.
-4. Public profile fields are stored in `public.profiles`; birthday is stored separately in `public.profile_private` and is visible only to its owner.
+## Release policy
+Changes are developed on feature/work branches and reviewed through pull requests. Existing open PRs are preserved. No destructive database migration, PR merge, real-money integration, or production deployment should occur without explicit approval.
 
-The current starter app does not yet include login UI. Until Auth is wired, the profile editor will explain that online save requires a signed-in account.
-
-
-### Birthday visibility
-The X profile editor stores the canonical birthday in the owner-only `profile_private` table. The optional **Show my birthday on profile** checkbox copies the selected date into `profiles.birthday_public`, which is part of the public profile data. When unchecked, `birthday_public` is cleared while the private birthday remains saved.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the staged implementation plan.
