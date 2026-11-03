@@ -16,7 +16,7 @@ MEMEVERSE is a Web3-inspired social, community, messaging, memecoin, and multi-m
 - Public player profiles with private birthday storage and profile-media uploads.
 - Database-backed X feed, following feed, likes, reposts, replies, follows, and bookmarks.
 - Realtime subscription for new X posts.
-- USDV simulated-credit wallet, ledger, and server-side simulated crypto market-order path for four crypto symbols.
+- USDV simulated-credit wallet, ledger, server-side simulated crypto market-order path for four crypto symbols, and account wallet display loaded from the authenticated user's database record.
 - Vercel static deployment and basic GitHub Actions JavaScript/config validation.
 
 ## Not production complete
