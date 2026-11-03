@@ -114,6 +114,99 @@ function xPostHTML(p){
  const follow=p.canFollow?("<button class=\"x-follow-button "+(p.following?"is-following":"")+"\" onclick=\"toggleXFollow(\'"+id+"\',\'"+esc(p.authorId)+"\')\">"+(p.following?"Following":"Follow")+"</button>"):"";
  return "<article class=\"x-post\" data-post-id=\""+id+"\">"+avatar+"<div class=\"x-post-main\"><div class=\"x-post-heading\"><b>"+esc(p.displayName||p.handle||"Player")+"</b><span class=\"x-handle\">@"+esc(p.handle||"player")+"</span><span class=\"x-dot\">·</span><span class=\"x-time\">"+esc(p.time||"now")+"</span>"+follow+"<button class=\"x-more\" aria-label=\"More\" onclick=\"demoNotice()\">···</button></div><p>"+esc(p.text)+"</p><div class=\"x-actions\"><button onclick=\"replyToXPost(\'"+id+"\')\" aria-label=\"Reply\">▢ <span>"+(p.replyCount||0)+"</span></button><button class=\""+(p.reposted?"x-action-active":"")+"\" onclick=\"toggleXAction(\'repost\',\'"+id+"\')\" aria-label=\"Repost\">⇄ <span>"+(p.repostCount||0)+"</span></button><button class=\""+(p.liked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'like\',\'"+id+"\')\" aria-label=\"Like\">♡ <span>"+(p.likeCount||0)+"</span></button><button aria-label=\"Views\">▥ <span>—</span></button><button class=\""+(p.bookmarked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'bookmark\',\'"+id+"\')\" aria-label=\"Bookmark\">♧</button><button onclick=\"navigator.clipboard?.writeText(location.href)\" aria-label=\"Share\">↗</button></div></div></article>";
 }
+
+function setXFeedMessage(message){const feed=document.getElementById("feed");if(feed)feed.innerHTML="<div class=\"x-feed-state\">"+esc(message)+"</div>"}
+function relativeXTime(value){const ms=Date.now()-new Date(value).getTime();if(!Number.isFinite(ms))return "now";const m=Math.max(0,Math.floor(ms/60000));if(m<1)return "now";if(m<60)return m+"m";const h=Math.floor(m/60);if(h<24)return h+"h";return Math.floor(h/24)+"d"}
+async function loadXFeed(mode=state.xFeedMode||"For you"){
+ const feed=document.getElementById("feed");if(!feed)return;const client=xClient();if(!client){setXFeedMessage("Supabase belum terhubung.");return}
+ if(state.xFeedLoading)return;state.xFeedLoading=true;feed.innerHTML="<div class=\"x-feed-state\">Loading MEMEVERSE posts…</div>";
+ try{
+  const {data:{user}}=await client.auth.getUser();
+  let query=client.from("x_posts").select("id,author_id,body,created_at,profile:profiles!x_posts_author_id_fkey(handle,display_name,avatar_url)").order("created_at",{ascending:false}).limit(50);
+  if(mode==="Following"){
+   if(!user){setXFeedMessage("Login untuk melihat feed Following.");return}
+   const {data:follows,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id);if(error)throw error;
+   const ids=(follows||[]).map(x=>x.followed_id);if(!ids.length){setXFeedMessage("Belum ada akun yang kamu ikuti. Mulai follow pemain lain!");return}
+   query=query.in("author_id",ids)
+  }
+  if(mode==="Bookmarks"){
+   if(!user){setXFeedMessage("Login untuk melihat bookmark.");return}
+   const {data:marks,error}=await client.from("x_bookmarks").select("post_id").eq("user_id",user.id).order("created_at",{ascending:false});if(error)throw error;
+   const ids=(marks||[]).map(x=>x.post_id);if(!ids.length){setXFeedMessage("Belum ada postingan yang disimpan.");return}
+   query=query.in("id",ids)
+  }
+  const {data:posts,error}=await query;if(error)throw error;
+  const ids=(posts||[]).map(p=>p.id);if(!ids.length){setXFeedMessage("Belum ada postingan. Jadilah yang pertama berbagi sesuatu!");return}
+  let likes=[],reposts=[],replies=[],marks=[],follows=[];
+  if(user){
+   const results=await Promise.all([
+    client.from("x_likes").select("post_id,user_id").in("post_id",ids),
+    client.from("x_reposts").select("post_id,user_id").in("post_id",ids),
+    client.from("x_replies").select("id,post_id").in("post_id",ids),
+    client.from("x_bookmarks").select("post_id").eq("user_id",user.id).in("post_id",ids),
+    client.from("x_follows").select("followed_id").eq("follower_id",user.id)
+   ]);
+   for(const r of results)if(r.error)throw r.error;
+   [likes,reposts,replies,marks,follows]=results.map(r=>r.data||[])
+  }else{
+   const r=await client.from("x_replies").select("id,post_id").in("post_id",ids);if(!r.error)replies=r.data||[]
+  }
+  const count=(arr,id)=>arr.filter(x=>x.post_id===id).length;
+  const liked=new Set(likes.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
+  const reposted=new Set(reposts.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
+  const bookmarked=new Set(marks.map(x=>x.post_id));
+  const following=new Set(follows.map(x=>x.followed_id));
+  state.posts=(posts||[]).map(p=>({
+   id:p.id,authorId:p.author_id,handle:p.profile?.handle||"player",
+   displayName:p.profile?.display_name||p.profile?.handle||"Player",
+   avatarUrl:p.profile?.avatar_url||null,text:p.body,time:relativeXTime(p.created_at),
+   likeCount:count(likes,p.id),repostCount:count(reposts,p.id),replyCount:count(replies,p.id),
+   liked:liked.has(p.id),reposted:reposted.has(p.id),bookmarked:bookmarked.has(p.id),
+   following:following.has(p.author_id),canFollow:!!user&&p.author_id!==user.id
+  }));
+  feed.innerHTML=state.posts.map(xPostHTML).join("");
+  if(!state.xRealtimeChannel){
+   state.xRealtimeChannel=client.channel("x-network-live-feed")
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"x_posts"},()=>{
+     if(document.body.dataset.currentPage==="x"&&state.xFeedMode==="For you")loadXFeed("For you")
+    }).subscribe()
+  }
+ }catch(error){setXFeedMessage("Gagal memuat feed: "+error.message)}
+ finally{state.xFeedLoading=false}
+}
+async function toggleXAction(action,postId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk berinteraksi dengan postingan.",true);return}
+ const tables={like:{table:"x_likes",key:"user_id"},repost:{table:"x_reposts",key:"user_id"},bookmark:{table:"x_bookmarks",key:"user_id"}};
+ const cfg=tables[action];if(!cfg)return;
+ const {data:existing,error:readError}=await client.from(cfg.table).select("post_id").eq(cfg.key,user.id).eq("post_id",postId).maybeSingle();
+ if(readError){setXFeedMessage(readError.message);return}
+ const result=existing
+  ?await client.from(cfg.table).delete().eq(cfg.key,user.id).eq("post_id",postId)
+  :await client.from(cfg.table).insert({[cfg.key]:user.id,post_id:postId});
+ if(result.error){setXFeedMessage("Aksi gagal: "+result.error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+async function replyToXPost(postId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk membalas postingan.",true);return}
+ const body=prompt("Tulis balasan (maks. 500 karakter):");if(!body?.trim())return;
+ const {error}=await client.from("x_replies").insert({post_id:postId,author_id:user.id,body:body.trim().slice(0,500)});
+ if(error){setXFeedMessage("Balasan gagal: "+error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+async function toggleXFollow(postId,authorId){
+ const client=xClient();const {data:{user}}=await client.auth.getUser();
+ if(!user){openAuth("login");setAuthMessage("Login untuk mengikuti pemain.",true);return}
+ const {data:existing,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id).eq("followed_id",authorId).maybeSingle();
+ if(error){setXFeedMessage(error.message);return}
+ const result=existing
+  ?await client.from("x_follows").delete().eq("follower_id",user.id).eq("followed_id",authorId)
+  :await client.from("x_follows").insert({follower_id:user.id,followed_id:authorId});
+ if(result.error){setXFeedMessage(result.error.message);return}
+ await loadXFeed(state.xFeedMode)
+}
+
 function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto"){demoNotice();return}state.xFeedMode=tab;loadXFeed(tab)}
 function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home"){state.xFeedMode="For you";loadXFeed("For you");return}if(label==="Bookmarks"){state.xFeedMode="Bookmarks";loadXFeed("Bookmarks");return}if(label==="Profile"){openXProfile();return}demoNotice()}
 function openXProfile(){document.getElementById("x-profile-view").hidden=false;loadXProfile()}
