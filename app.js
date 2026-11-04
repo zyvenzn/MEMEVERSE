@@ -251,18 +251,25 @@
     $("top-equity").textContent=money(totalEquity());
   }
 
+  function reservedBuyCash() {
+    return state.orders.filter((o)=>o.status==="OPEN"&&o.side==="BUY").reduce((sum,o)=>sum+o.limitPrice*o.quantity*(1+FEE_RATE),0);
+  }
+  function reservedSellQuantity(symbol) {
+    return state.orders.filter((o)=>o.status==="OPEN"&&o.side==="SELL"&&o.symbol===symbol).reduce((sum,o)=>sum+o.quantity,0);
+  }
+
   function executeMarketOrder(side, symbol, quantity) {
     const asset=ASSETS.find((x)=>x.symbol===symbol), price=priceOf(symbol);
     if(!asset || !Number.isFinite(quantity) || quantity<=0)throw new Error("Enter a valid quantity.");
     const gross=price*quantity, fee=gross*FEE_RATE, total=gross+fee;
     const existing=positionOf(symbol);
     if(side==="BUY"){
-      if(total>state.cash)throw new Error("Insufficient virtual cash.");
+      if(total+reservedBuyCash()>state.cash)throw new Error("Insufficient available virtual cash after pending buy orders.");
       state.cash-=total;
       if(existing){const newQty=existing.quantity+quantity;existing.averagePrice=((existing.averagePrice*existing.quantity)+gross+fee)/newQty;existing.quantity=newQty;}
       else state.positions.push({symbol,name:asset.name,quantity,averagePrice:(gross+fee)/quantity});
     } else {
-      if(!existing || existing.quantity+1e-10<quantity)throw new Error("Not enough units in this demo position.");
+      if(!existing || existing.quantity-reservedSellQuantity(symbol)+1e-10<quantity)throw new Error("Not enough available units after pending sell orders.");
       const pnl=(price-existing.averagePrice)*quantity;
       state.cash+=gross-fee;
       existing.quantity-=quantity;
@@ -285,8 +292,8 @@
         const limitPrice=Number($("limit-price").value);
         if(!Number.isFinite(limitPrice)||limitPrice<=0)throw new Error("Enter a valid limit price.");
         const order={id:uid(),timestamp:Date.now(),symbol,side,type,quantity,limitPrice,status:"OPEN"};
-        if(side==="BUY" && limitPrice*quantity*(1+FEE_RATE)>state.cash)throw new Error("Insufficient virtual cash for this limit order.");
-        if(side==="SELL"){const p=positionOf(symbol);if(!p||p.quantity<quantity)throw new Error("Not enough units to place this sell limit order.");}
+        if(side==="BUY" && reservedBuyCash()+limitPrice*quantity*(1+FEE_RATE)>state.cash)throw new Error("Insufficient available virtual cash for this limit order.");
+        if(side==="SELL"){const p=positionOf(symbol);if(!p||p.quantity-reservedSellQuantity(symbol)<quantity)throw new Error("Not enough available units to reserve for this sell limit order.");}
         state.orders.unshift(order);persistSnapshot();toast("Limit order placed in simulation.");
       }
       renderAll();
