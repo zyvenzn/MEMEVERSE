@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+      - work/memeverse-platform-completion
       - feature/terminal-offline-release-1
 jobs:
   validate:
