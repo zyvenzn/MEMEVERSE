@@ -1,66 +1,88 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090d18">
-  <title>MEMEVERSE — Virtual Economy</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="MEMEVERSE Terminal — offline-first multi-market trading simulator.">
+  <meta name="application-name" content="MEMEVERSE">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <title>MEMEVERSE Terminal</title>
 </head>
 <body>
-  <div class="shell">
+  <div id="loading-screen"><div class="load-card"><div class="brand-mark">M</div><h1>MEMEVERSE</h1><p>Preparing your offline trading terminal…</p></div></div>
+  <div id="app-shell" class="app-shell" hidden>
     <aside class="sidebar">
-      <div class="brand"><span class="brand-mark">M</span><div><b>MEMEVERSE</b><small>VIRTUAL ECONOMY</small></div></div>
-      <div class="nav-label">WORKSPACE</div>
-      <nav id="nav">
-        <button class="nav-item active" data-page="overview">◈ <span>Overview</span></button>
-        <button class="nav-item" data-page="x">𝕏 <span>X Network</span></button>
-        <button class="nav-item" data-page="telegram">➤ <span>Telegram</span></button>
-        <button class="nav-item" data-page="discord">◉ <span>Discord</span></button>
-        <button class="nav-item" data-page="pump">🚀 <span>Pump.fun</span></button>
-        <button class="nav-item" data-page="trading">⌁ <span>Trading</span></button>
-        <button class="nav-item" data-page="market">▦ <span>Marketplace</span></button>
+      <a class="brand" href="./" aria-label="MEMEVERSE home"><span class="brand-mark">M</span><span><b>MEMEVERSE</b><small>TERMINAL</small></span></a>
+      <div class="nav-caption">WORKSPACE</div>
+      <nav class="primary-nav">
+        <button class="nav-link active" data-view="overview"><span>◫</span> Overview</button>
+        <button class="nav-link" data-view="markets"><span>⌕</span> Markets</button>
+        <button class="nav-link" data-view="trade"><span>▥</span> Trading terminal</button>
+        <button class="nav-link" data-view="portfolio"><span>◩</span> Portfolio</button>
+        <button class="nav-link" data-view="orders"><span>⇄</span> Open orders</button>
+        <button class="nav-link" data-view="history"><span>◷</span> Trade history</button>
       </nav>
-      <div class="sidebar-bottom"><div class="avatar">T</div><div><b>Test Trader</b><small>Demo account</small></div><span class="online"></span></div>
+      <div class="sidebar-bottom">
+        <div class="offline-indicator"><i></i><span>OFFLINE SIMULATION</span></div>
+        <button class="nav-link settings-link" data-view="settings"><span>⚙</span> Settings</button>
+        <div class="sidebar-note">Virtual funds only.<br>No broker connection.</div>
+      </div>
     </aside>
-    <main class="main">
+    <main class="main-content">
       <header class="topbar">
-        <div class="topbar-heading"><span class="eyebrow">YOUR WEB3 UNIVERSE</span><h1 id="page-title">Universe Dashboard</h1></div><label class="dashboard-search"><span>⌕</span><input type="search" placeholder="Search MEMEVERSE..." aria-label="Search MEMEVERSE"><kbd>⌘ K</kbd></label>
-        <div class="top-actions"><span class="status"><i></i> Demo mode</span><div class="balance"><small>USDV DEVELOPMENT CREDITS</small><b id="top-balance">Sign in to view</b></div></div>
+        <div><div class="eyebrow">MEMEVERSE / <span id="page-title">Overview</span></div><h1 id="mobile-title">Overview</h1></div>
+        <div class="topbar-right"><span class="demo-badge"><i></i> DEMO · OFFLINE</span><div class="equity-chip"><small>ACCOUNT EQUITY</small><b id="top-equity">$100,000.00</b></div><div class="avatar">M</div></div>
       </header>
-      <section id="content"></section>
-      <nav class="mobile-dock" id="mobile-dock" aria-label="Mobile navigation">
-        <button class="dock-item active" data-page="overview"><span>⌂</span><small>Home</small></button>
-        <button class="dock-item" data-page="x"><span>𝕏</span><small>Social</small></button>
-        <button class="dock-item" data-page="pump"><span>🚀</span><small>Launch</small></button>
-        <button class="dock-item" data-page="trading"><span>⌁</span><small>Markets</small></button>
-        <button class="dock-item" data-page="telegram"><span>➤</span><small>Messages</small></button>
-      </nav>
-      <footer>MEMEVERSE prototype · Virtual currency only · Not connected to real financial markets</footer>
-    </main>
-  </div>
 
-  <button id="auth-launcher" class="auth-launcher" type="button">Sign in / Create account</button>
-  <section id="auth-modal" class="auth-modal" hidden aria-modal="true" role="dialog" aria-labelledby="auth-title">
-    <div class="auth-card">
-      <button id="auth-close" class="auth-close" type="button" aria-label="Close">×</button>
-      <p class="auth-eyebrow">MEMEVERSE ACCOUNT</p>
-      <h2 id="auth-title">Welcome back</h2>
-      <p id="auth-account-state" class="auth-account-state">Not signed in</p>
-      <form id="auth-form">
-        <label id="auth-name-field" hidden>Display name<input id="auth-display-name" type="text" maxlength="40" autocomplete="name" placeholder="Your name"></label>
-        <label id="auth-email-field">Email<input id="auth-email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
-        <label id="auth-password-field">Password<input id="auth-password" type="password" minlength="8" autocomplete="current-password" placeholder="At least 8 characters"></label>
-        <button id="auth-forgot" class="auth-text-button" type="button">Forgot password?</button>
-        <button id="auth-submit" class="auth-submit" type="submit">Sign in</button>
-      </form>
-      <button id="auth-signout" class="auth-submit auth-signout" type="button" hidden>Sign out</button>
-      <button id="auth-switch" class="auth-text-button auth-switch" type="button">New to MEMEVERSE? Create account</button>
-      <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
-    </div>
-  </section>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0"></script>
-  <script src="supabase-config.js"></script>
-  <script src="app.js"></script>
+      <section id="view-overview" class="view">
+        <div class="welcome-row"><div><div class="eyebrow">YOUR MARKETS, YOUR WORKSPACE</div><h2>Trading overview</h2><p>Practice across crypto, stocks and forex using a local simulated account.</p></div><button class="primary-button" data-view="trade">Open terminal <span>↗</span></button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><small>ACCOUNT EQUITY</small><strong id="overview-equity">$100,000.00</strong><span>Cash + open positions</span></article>
+          <article class="stat-card"><small>AVAILABLE CASH</small><strong id="overview-cash">$100,000.00</strong><span>Virtual buying power</span></article>
+          <article class="stat-card"><small>UNREALIZED P/L</small><strong id="overview-unrealized">$0.00</strong><span>Open positions</span></article>
+          <article class="stat-card"><small>REALIZED P/L</small><strong id="overview-realized">$0.00</strong><span>Closed trade results</span></article>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel market-panel"><div class="panel-heading"><div><div class="eyebrow">MARKET SNAPSHOT</div><h3>Markets</h3></div><button class="subtle-button" data-view="markets">View all ↗</button></div><div class="table-wrap"><table><thead><tr><th></th><th>Instrument</th><th class="numeric">Last price</th><th class="numeric">Change*</th><th>Market</th></tr></thead><tbody id="overview-markets"></tbody></table></div><p class="fine-print">*Change is measured against the simulator's initial reference price. All quotes are simulated.</p></section>
+          <section class="panel"><div class="panel-heading"><div><div class="eyebrow">YOUR EXPOSURE</div><h3>Open positions</h3></div><button class="subtle-button" data-view="portfolio">Portfolio ↗</button></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th class="numeric">Quantity</th><th class="numeric">Avg. entry</th><th class="numeric">Mark</th><th class="numeric">P/L</th></tr></thead><tbody id="overview-positions"></tbody></table></div></section>
+        </div>
+      </section>
+
+      <section id="view-markets" class="view" hidden>
+        <div class="welcome-row"><div><div class="eyebrow">INSTRUMENT DISCOVERY</div><h2>Markets</h2><p>Browse simulated instruments across three asset classes.</p></div><label class="search-box"><span>⌕</span><input id="market-search" type="search" placeholder="Search symbol or name"></label></div>
+        <div class="filter-row"><button class="filter-chip active" data-category="All">All markets</button><button class="filter-chip" data-category="Crypto">Crypto</button><button class="filter-chip" data-category="Stocks">Stocks</button><button class="filter-chip" data-category="Forex">Forex</button></div>
+        <section class="panel"><div class="table-wrap"><table><thead><tr><th></th><th>Instrument</th><th class="numeric">Last price</th><th class="numeric">Change*</th><th>Market</th><th></th></tr></thead><tbody id="market-table-body"></tbody></table></div></section>
+      </section>
+
+      <section id="view-trade" class="view" hidden>
+        <div class="trade-heading"><div><div class="eyebrow">SIMULATED EXECUTION</div><h2 id="trade-symbol">BTCUSD</h2><p id="trade-name">Bitcoin · Crypto · DEMO</p></div><div class="price-block"><strong id="trade-price">$67,420.00</strong><span id="trade-change">SIMULATED PRICE</span></div></div>
+        <div class="terminal-grid">
+          <section class="panel chart-panel"><div class="panel-heading"><div><div class="eyebrow">PRICE ACTION</div><h3>Market chart <span class="demo-tag">DEMO</span></h3></div><div class="timeframes"><button data-timeframe="1m" class="active">1m</button><button data-timeframe="5m">5m</button><button data-timeframe="15m">15m</button><button data-timeframe="1h">1H</button><button data-timeframe="1d">1D</button></div></div><canvas id="price-chart" aria-label="Simulated candlestick chart"></canvas><div class="chart-legend"><span><i class="up"></i> Up candle</span><span><i class="down"></i> Down candle</span><span>Locally generated prices</span></div></section>
+          <section class="panel order-panel"><div class="panel-heading"><div><div class="eyebrow">ORDER ENTRY</div><h3>Place demo order</h3></div><span class="demo-tag">VIRTUAL</span></div><div class="order-tabs"><label>Order type<select id="order-type"><option value="MARKET">Market</option><option value="LIMIT">Limit</option></select></label><label>Quantity<input id="order-quantity" type="number" min="0.000001" step="any" value="0.01"></label><label id="limit-price-wrap" hidden>Limit price<input id="limit-price" type="number" min="0.000001" step="any" placeholder="Enter limit price"></label></div><div class="order-estimate"><span>Estimated value</span><b id="order-estimate">$674.20</b></div><div class="cash-available"><span>Available virtual cash</span><b id="trade-cash">$100,000.00</b></div><div class="fee-note">Simulated fee: 0.10% per execution. No real funds are used.</div><div class="order-buttons"><button id="buy-button" class="buy-button">Buy / Long</button><button id="sell-button" class="sell-button">Sell / Close</button></div></section>
+          <section class="panel watch-panel"><div class="panel-heading"><div><div class="eyebrow">QUICK ACCESS</div><h3>Watchlist</h3></div><button class="subtle-button" data-view="markets">Add assets +</button></div><div id="watchlist" class="watchlist"></div></section>
+        </div>
+      </section>
+
+      <section id="view-portfolio" class="view" hidden>
+        <div class="welcome-row"><div><div class="eyebrow">ACCOUNT BREAKDOWN</div><h2>Portfolio</h2><p>Your simulated holdings and performance.</p></div></div>
+        <div class="stats-grid four"><article class="stat-card"><small>TOTAL EQUITY</small><strong id="portfolio-equity">$100,000.00</strong></article><article class="stat-card"><small>AVAILABLE CASH</small><strong id="portfolio-cash">$100,000.00</strong></article><article class="stat-card"><small>INVESTED VALUE</small><strong id="portfolio-invested">$0.00</strong></article><article class="stat-card"><small>TOTAL P/L</small><strong id="portfolio-pnl">$0.00</strong></article></div>
+        <section class="panel"><div class="panel-heading"><div><div class="eyebrow">CURRENT HOLDINGS</div><h3>Open positions</h3></div></div><div class="table-wrap"><table><thead><tr><th>Asset</th><th class="numeric">Quantity</th><th class="numeric">Average entry</th><th class="numeric">Current mark</th><th class="numeric">Unrealized P/L</th></tr></thead><tbody id="portfolio-body"></tbody></table></div></section>
+      </section>
+
+      <section id="view-orders" class="view" hidden><div class="welcome-row"><div><div class="eyebrow">PENDING EXECUTION</div><h2>Open orders</h2><p>Limit orders are matched by the local price simulator.</p></div></div><section class="panel"><div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Side</th><th>Type</th><th class="numeric">Quantity</th><th class="numeric">Limit price</th><th></th></tr></thead><tbody id="open-orders-body"></tbody></table></div></section></section>
+
+      <section id="view-history" class="view" hidden><div class="welcome-row"><div><div class="eyebrow">ACCOUNT ACTIVITY</div><h2>Trade history</h2><p>Completed simulated executions saved on this device.</p></div></div><section class="panel"><div class="table-wrap"><table><thead><tr><th>Date / time</th><th>Symbol</th><th>Side</th><th class="numeric">Quantity</th><th class="numeric">Execution price</th><th class="numeric">Realized P/L</th></tr></thead><tbody id="history-body"></tbody></table></div></section></section>
+
+      <section id="view-settings" class="view" hidden><div class="welcome-row"><div><div class="eyebrow">LOCAL APPLICATION</div><h2>Settings</h2><p>Manage your offline demo environment.</p></div></div><section class="panel settings-panel"><div><h3>Simulation controls</h3><p>Pause price movement or reset your local demo account.</p><button id="pause-market" class="subtle-button">Pause simulation</button> <button id="reset-demo" class="danger-button">Reset demo account</button></div><div class="settings-disclaimer"><b>Offline simulation only</b><p>MEMEVERSE Release 1.0 uses generated prices and virtual funds. It is not connected to a broker, exchange, bank, or live market-data service. Prices and executions are illustrative and must not be used for investment decisions.</p></div><p class="fine-print">Your account data is stored locally in this browser or app installation. It is not synchronized between devices. Export/Import backup will be added in a later update.</p></section></section>
+
+      <footer class="app-footer">MEMEVERSE TERMINAL · OFFLINE SIMULATION · VIRTUAL FUNDS ONLY</footer>
+    </main>
+    <nav class="mobile-nav" aria-label="Mobile navigation"><button class="active" data-view="overview"><span>◫</span><small>Home</small></button><button data-view="markets"><span>⌕</span><small>Markets</small></button><button data-view="trade"><span>▥</span><small>Trade</small></button><button data-view="portfolio"><span>◩</span><small>Portfolio</small></button><button data-view="settings"><span>⚙</span><small>Settings</small></button></nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
 </body>
 </html>
