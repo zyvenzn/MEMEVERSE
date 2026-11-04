@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/terminal-offline-release-1
+  pull_request:
+    branches:
+      - work/memeverse-platform-completion
 jobs:
   android-debug:
     runs-on: ubuntu-latest
