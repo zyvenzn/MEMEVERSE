@@ -1,0 +1,9 @@
+{
+  "appId": "com.memeverse.terminal",
+  "appName": "MEMEVERSE",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#080d17",
+    "allowMixedContent": false
+  }
+}

@@ -1,45 +1,62 @@
-# MEMEVERSE
+# MEMEVERSE Terminal
 
-**MEMEVERSE — Enter the Internet's Financial Universe.**
+**MEMEVERSE — Hybrid Professional Trading Terminal.**
 
-MEMEVERSE is a Web3-inspired social, community, messaging, memecoin, and multi-market terminal platform. This repository is under active staged development. It is not yet a production-ready exchange or complete social platform.
+Release 1.0 is an offline-first simulated trading application for desktop web and Android.
+
+## Product scope
+
+- Cryptocurrency simulator.
+- Stock simulator.
+- Forex simulator.
+- Desktop professional multi-panel terminal.
+- Dedicated responsive mobile experience.
+- Simulated market/limit orders.
+- Virtual cash, positions, portfolio, watchlist and trade history.
+- Local persistence using IndexedDB.
+- PWA Service Worker for application-shell caching.
+- Android packaging through Capacitor 8.
+
+All quotes and transactions are synthetic/demo only. There is no broker, exchange, bank, live market data or real-money execution.
 
 ## Current architecture
-- Frontend: vanilla HTML, CSS, and JavaScript.
-- Hosting: Vercel.
-- Backend: Supabase Auth, PostgreSQL, Storage, Realtime, and Edge Functions.
-- Canonical backend: the Supabase project named MEMEVERSE.
-- Development baseline: work/memeverse-platform-completion, based on feature/stage-2-x-network.
 
-## Current implementation
-- Email/password authentication, session restoration, password recovery, and profile editing.
-- Public player profiles with private birthday storage and profile-media uploads.
-- Database-backed X feed, following feed, likes, reposts, replies, follows, and bookmarks.
-- Realtime subscription for new X posts.
-- USDV simulated-credit wallet, ledger, server-side simulated crypto market-order path for four crypto symbols, and account wallet display loaded from the authenticated user's database record.
-- Vercel static deployment and basic GitHub Actions JavaScript/config validation.
-
-## Not production complete
-MEMEVERSE Pump, Messenger, Community, and the full Trading Terminal are not complete. Current Pump, Messenger, and Community screens contain demo or placeholder behavior. USDV is simulated development credit only. The trading backend does not execute real-money or blockchain transactions. Market data coverage is limited and must not be represented as a complete live multi-market terminal.
-
-A separate legacy Supabase project named X-Network contains an older X identity/schema. It is documented as legacy and must not be merged directly into the primary app without migration work.
-
-## Documentation
-- [Architecture](docs/ARCHITECTURE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Database schema](docs/DATABASE_SCHEMA.md)
-- [Security](docs/SECURITY.md)
-- [Deployment](docs/DEPLOYMENT.md)
-- [Testing](docs/TESTING.md)
-- [Changelog](docs/CHANGELOG.md)
-- [Known issues](docs/KNOWN_ISSUES.md)
+- Shared frontend: vanilla HTML, CSS and JavaScript.
+- Local database: IndexedDB.
+- Web offline caching: Service Worker.
+- Desktop hosting: Vercel static deployment.
+- Android: Capacitor 8.6.0.
+- Legacy Supabase Auth, database, wallet, Edge Functions and historical modules remain preserved but are not required for offline simulation.
 
 ## Local development
-The frontend is static. Serve the repository root with any local static HTTP server. Configure supabase-config.js with the primary Supabase project URL and browser-safe publishable/anon key. Never put a Supabase service-role or secret key in browser code.
 
-Before public signup, verify Supabase Auth redirect URLs, email confirmation, SMTP, RLS, Storage policies, and preview/production domain configuration.
+Use Node.js 22+ and serve the repository root through HTTPS or localhost. IndexedDB is required for persistent account state.
 
-## Release policy
-Changes are developed on feature/work branches and reviewed through pull requests. Existing open PRs are preserved. No destructive database migration, PR merge, real-money integration, or production deployment should occur without explicit approval.
+## Android build
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the staged implementation plan.
+Install Android Studio 2025.2.1+ and Android SDK Platform 36.
+
+```bash
+npm install
+npm run build
+npx cap add android
+npx cap sync android
+npx cap open android
+```
+
+After creating the Android project once:
+
+```bash
+npm run android:sync
+npm run android:open
+```
+
+See [Offline and Android build guide](docs/OFFLINE_ANDROID.md).
+
+## Existing infrastructure preservation
+
+The primary Supabase project and historical branches/PRs are intentionally retained. The old X-Network Supabase project is not deleted. No destructive database migrations, PR merges, production deployments or real-money integrations are part of this work.
+
+## Release status
+
+This is an active development branch, not a completed Play Store release. Physical-device testing, generated Android assets, backup/restore, security review, signed AAB creation and Play Console review remain release gates.

@@ -1,0 +1,23 @@
+name: Terminal validation
+on:
+  push:
+    branches:
+      - feature/terminal-offline-release-1
+  pull_request:
+    branches:
+      - main
+      - work/memeverse-platform-completion
+      - feature/terminal-offline-release-1
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: node --check app.js
+      - run: node --check scripts/prepare-web.mjs
+      - run: npm run build
+      - run: test -f dist/index.html && test -f dist/app.js && test -f dist/style.css && test -f dist/sw.js && test -f public/index.html && test -f public/app.js && test -f public/style.css && test -f public/sw.js

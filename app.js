@@ -1,271 +1,395 @@
-const state={balance:10000,walletBalance:null,walletCurrency:"USDV",walletRequest:0,xProfile:{},xAvatarFile:null,xBannerFile:null,posts:[],xFeedMode:"For you",xRealtimeChannel:null,xFeedLoading:false,holdings:[],tokens:[],orders:[]};
-const money=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const content=document.getElementById("content"), title=document.getElementById("page-title");
-function renderOverview(){
-const apps=[
-{icon:"𝕏",name:"X Network",desc:"Social feed, posts & creators",page:"x",tone:"violet",meta:"Social"},
-{icon:"➤",name:"Telegram",desc:"Private chats & messaging",page:"telegram",tone:"blue",meta:"Messages"},
-{icon:"◉",name:"Discord",desc:"Servers & communities",page:"discord",tone:"indigo",meta:"Community"},
-{icon:"🚀",name:"Pump.fun",desc:"Launch & trade memecoins",page:"pump",tone:"orange",meta:"Launchpad"},
-{icon:"⌁",name:"Trading Terminal",desc:"Crypto, stocks & forex",page:"trading",tone:"green",meta:"Markets"},
-{icon:"▦",name:"Marketplace",desc:"Digital goods & services",page:"market",tone:"pink",meta:"Explore"}
-];
-const appCards=apps.map(a=>`<button class="universe-app-card ${a.tone}" onclick="go('${a.page}')"><span class="app-card-glow"></span><span class="universe-app-icon">${a.icon}</span><span class="universe-app-meta">${a.meta}</span><b>${a.name}</b><small>${a.desc}</small><span class="app-card-arrow">↗</span></button>`).join("");
-return `
-<section class="universe-hero">
- <div class="hero-stars"></div><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-planet"><div class="planet-ring"></div><div class="planet-core"></div></div>
- <div class="hero-copy"><span class="hero-kicker"><i></i> THE WEB3 UNIVERSE</span><h2>One universe.<br><em>Infinite possibilities.</em></h2><p>Connect, create, trade, and build your world inside MEMEVERSE.</p><div class="hero-actions"><button class="hero-primary" onclick="go('x')">Explore the universe <span>→</span></button><button class="hero-secondary" onclick="go('trading')">Open trading terminal ↗</button></div></div>
- <div class="hero-live"><i></i><span>YOUR UNIVERSE IS LIVE</span><b>Welcome back, explorer</b><small>Everything you need, in one place.</small></div>
- <div class="hero-index"><b>01</b><span>/</span><small>THE BEGINNING</small></div>
-</section>
-<section class="universe-apps-section"><div class="universe-section-heading"><div><span class="section-kicker">EXPLORE THE ECOSYSTEM</span><h2>Your applications</h2></div><span class="section-note">6 connected worlds</span></div><div class="universe-app-grid">${appCards}</div></section>
-<div class="universe-dashboard-grid">
- <section class="universe-panel market-panel"><div class="universe-panel-head"><div><span class="section-kicker">THE PULSE OF THE MARKET</span><h2>Market overview</h2></div><span class="demo-chip">DEMO DATA</span></div><div class="market-tiles">
-  <article class="market-tile"><div class="market-asset"><span class="coin btc">₿</span><b>Bitcoin <small>BTC / USD</small></b></div><strong>$67,420.00</strong><span class="market-change positive">↗ +2.48%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 34 C18 31 18 18 34 24 S55 38 70 21 S94 27 109 15 S131 25 145 10 S164 18 180 3" /></svg></article>
-  <article class="market-tile"><div class="market-asset"><span class="coin eth">◆</span><b>Ethereum <small>ETH / USD</small></b></div><strong>$3,421.75</strong><span class="market-change positive">↗ +3.12%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 31 C17 27 22 34 38 22 S57 26 73 17 S94 29 112 13 S140 22 153 8 S169 12 180 3" /></svg></article>
-  <article class="market-tile"><div class="market-asset"><span class="coin sol">≋</span><b>Solana <small>SOL / USD</small></b></div><strong>$168.27</strong><span class="market-change positive">↗ +4.21%</span><svg viewBox="0 0 180 42" preserveAspectRatio="none"><path d="M0 34 C15 26 25 31 40 19 S62 27 79 14 S104 25 121 10 S144 19 157 7 S171 9 180 2" /></svg></article>
- </div><p class="market-disclaimer">Illustrative interface values only. Market feeds are not connected yet.</p><button class="panel-link" onclick="go('trading')">Open trading terminal <span>→</span></button></section>
- <section class="universe-panel trending-panel"><div class="universe-panel-head"><div><span class="section-kicker">COMMUNITY MOMENTUM</span><h2>Trending tokens</h2></div><button class="text-link" onclick="go('pump')">View all ↗</button></div>
-  <div class="trend-row"><span class="trend-rank">01</span><span class="trend-token token-meme">M</span><span class="trend-name"><b>$MEME</b><small>MEMEVERSE Token</small></span><strong class="positive">+24.5%</strong></div>
-  <div class="trend-row"><span class="trend-rank">02</span><span class="trend-token token-doge">Ð</span><span class="trend-name"><b>$DOGE</b><small>Dogecoin</small></span><strong class="positive">+12.4%</strong></div>
-  <div class="trend-row"><span class="trend-rank">03</span><span class="trend-token token-pepe">P</span><span class="trend-name"><b>$PEPE</b><small>Pepe Coin</small></span><strong class="positive">+8.9%</strong></div>
-  <div class="trend-row"><span class="trend-rank">04</span><span class="trend-token token-sol">≋</span><span class="trend-name"><b>$SOL</b><small>Solana</small></span><strong class="positive">+7.6%</strong></div>
-  <p class="market-disclaimer">Illustrative trends, not live token data.</p></section>
- <section class="universe-panel activity-panel"><div class="universe-panel-head"><div><span class="section-kicker">FROM ACROSS YOUR WORLDS</span><h2>Latest activity</h2></div><button class="text-link" onclick="go('x')">Open social ↗</button></div><article class="universe-activity"><span class="activity-avatar">M</span><div><b>MEMEVERSE Official <i>✓</i></b><small>@memeverse · Just now</small><p>Your Web3 universe is here. Explore, connect, and build something amazing. <a>#MEMEVERSE</a></p><div class="activity-actions"><span>♡ 128</span><span>↗ 32</span><span>◌ 1.2K views</span></div></div></article></section>
- <section class="universe-panel communities-panel"><div class="universe-panel-head"><div><span class="section-kicker">FIND YOUR PEOPLE</span><h2>Top communities</h2></div><button class="text-link" onclick="go('discord')">Explore ↗</button></div>
-  <div class="community-row"><span class="community-avatar community-purple">M</span><span><b>MEME Culture</b><small>842K members</small></span><button onclick="go('discord')">Explore</button></div>
-  <div class="community-row"><span class="community-avatar community-orange">₿</span><span><b>Crypto Traders</b><small>730K members</small></span><button onclick="go('discord')">Explore</button></div>
-  <div class="community-row"><span class="community-avatar community-blue">⌘</span><span><b>Web3 Builders</b><small>521K members</small></span><button onclick="go('discord')">Explore</button></div>
- </section>
-</div>`;
-}
-const pages={
-overview:()=>renderOverview(),
-x:()=>`<div class="x-app" id="x-app">
-  <header class="x-topbar">
-    <button class="x-back-home" onclick="goHome()" aria-label="Back to MEMEVERSE">‹</button>
-    <div class="x-logo" aria-label="X">𝕏</div>
-    <button class="x-account-button" onclick="document.getElementById('auth-launcher').click()">Account</button>
-    <button class="x-avatar-button" onclick="openXProfile()" aria-label="Open profile"><span class="x-avatar">M</span></button>
-    <button class="x-top-action" onclick="demoNotice()" aria-label="Find people"><svg viewBox="0 0 28 28"><path d="M14 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10ZM4 25c.8-5 4.2-8 10-8 2.1 0 3.9.4 5.3 1.2M23 15v9m-4.5-4.5h9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
-  </header>
-  <nav class="x-tabs" aria-label="Timeline tabs">
-    <button class="active" data-x-tab="For you" onclick="setXTab('For you')">For you <span class="x-chevron">⌄</span></button>
-    <button data-x-tab="Following" onclick="setXTab('Following')">Following</button>
-    <button data-x-tab="Add" onclick="setXTab('Add')">Add <span>＋</span></button>
-    <button data-x-tab="Crypto" onclick="setXTab('Crypto')">Crypto</button>
-  </nav>
-  <section class="x-composer">
-    <div class="x-avatar x-composer-avatar">M</div>
-    <div class="x-compose-main">
-      <textarea id="post-input" maxlength="500" placeholder="What is happening?"></textarea>
-      <div class="x-compose-footer"><span id="x-char-count">500</span><button class="x-post-button" onclick="addPost()">Posting</button></div>
-    </div>
-  </section>
-  <div class="x-feed" id="feed"><div class="x-feed-state">Loading MEMEVERSE posts…</div></div>
-  <button class="x-fab" onclick="document.getElementById('post-input').focus()" aria-label="Compose post">＋</button>
-  <nav class="x-bottom-nav" aria-label="Main navigation">
-    <button class="active" onclick="setXNav(this,'Home')" aria-label="Home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
-    <button onclick="setXNav(this,'Search')" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7.3"/><path d="m16.2 16.2 5 5"/></svg></button>
-    <button onclick="setXNav(this,'Bookmarks')" aria-label="Bookmarks"><svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></button>
-    <button onclick="setXNav(this,'Notifications')" aria-label="Notifications"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4"/></svg></button>
-    <button onclick="setXNav(this,'Messages')" aria-label="Messages"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m4 6 8 7 8-7"/></svg></button>
-  </nav>
-  <div id="x-profile-view" class="x-profile-view" hidden>
-    <div class="x-profile-sheet">
-      <div class="x-profile-sheet-head"><button onclick="closeXProfile()">←</button><b>Profile</b><button onclick="closeXProfile()">×</button></div>
-      <div class="x-profile-banner" id="profile-banner-preview"><span> </span></div>
-      <div class="x-profile-controls"><div class="profile-avatar" id="profile-avatar-preview">M</div><button class="x-edit-profile-button" onclick="openXProfileEditor()">Edit profile</button></div>
-      <h2 id="profile-preview-name">Your display name</h2><p class="x-profile-handle" id="profile-preview-handle">@username</p>
-      <p id="profile-preview-bio" class="x-profile-bio">Your bio will appear here.</p>
-      <div class="x-profile-meta"><span id="profile-preview-location">⌖ Add your location</span><span id="profile-preview-website">↗ Add website</span><span id="profile-preview-birthday" hidden></span></div>
-      <p class="x-profile-stats"><b>0</b> Followers　<b>0</b> Following　<b>\${state.posts.length}</b> Posts</p>
-    </div>
-  </div>
-  <div id="x-profile-edit-view" class="x-profile-edit-view" hidden>
-    <header class="x-edit-page-header"><button onclick="closeXProfileEditor()">←</button><b>Edit profile</b><button id="x-profile-save-top" onclick="saveXProfile()">Save</button></header>
-    <div class="x-edit-page-body">
-      <div class="x-edit-cover"><div class="x-edit-cover-image" id="x-edit-banner-preview"></div><label class="x-camera-button x-cover-camera">📷<span>+</span><input id="x-banner-file" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
-      <div class="x-edit-avatar-wrap"><div class="x-edit-avatar" id="x-edit-avatar-preview">M</div><label class="x-camera-button x-avatar-camera">📷<span>+</span><input id="x-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
-      <div class="x-edit-fields">
-        <label>Name<input id="x-display-name" class="x-edit-input" maxlength="40" placeholder="Name"></label>
-        <label>Username<input id="x-handle" class="x-edit-input" maxlength="24" placeholder="username"></label>
-        <label>Bio<textarea id="x-bio" class="x-edit-input x-edit-textarea" maxlength="160" rows="2" placeholder="Bio"></textarea></label>
-        <label>Location<input id="x-location" class="x-edit-input" maxlength="80" placeholder="Location"></label>
-        <label>Website<input id="x-website" class="x-edit-input" type="url" placeholder="Website"></label>
-        <label>Birth date<input id="x-birthday" class="x-edit-input" type="date"></label>
-        <div class="x-birthday-privacy">Month and day: Only you<br>Year: Only you</div>
-        <label class="x-birthday-toggle"><input id="x-birthday-public" type="checkbox"><span>Show my birthday on profile (month and day only)</span></label>
-        <p id="x-profile-status" class="muted" role="status">Login MEMEVERSE untuk memuat dan menyimpan profil online.</p>
-      </div>
-    </div>
-  </div></div>`,
+/* MEMEVERSE Terminal — offline-first simulated trading application. */
+(function () {
+  "use strict";
 
-telegram:()=>`<p class="page-intro">A private messaging platform with fictional in-game phone numbers.</p><div class="grid two"><div class="card"><b>Virtual number store</b><p class="muted">Numbers are simulated and cannot receive real SMS or calls.</p><div class="notice">🇺🇸 +1 202 ••• 0184 <button class="button" onclick="buy(5,'Virtual number')">Buy $5</button></div><br><div class="notice">🇮🇩 +62 811 ••• 4920 <button class="button" onclick="buy(5,'Virtual number')">Buy $5</button></div></div><div class="card"><b>Telegram profile</b><div class="form"><input class="input" placeholder="Display name"><input class="input" placeholder="@username"></div><div class="form"><input class="input" placeholder="Bio"></div><button class="button secondary" onclick="demoNotice()">Save profile (demo)</button><div class="section-head"><h2>Chats</h2></div><p class="muted">Your chats and groups will appear here after online accounts are implemented.</p></div></div>`,
-discord:()=>`<p class="page-intro">Build communities, organize channels and trade server templates.</p><div class="grid two"><div class="card"><b>Create a server</b><div class="form"><input id="server-name" class="input" placeholder="Server name"><button class="button" onclick="createServer()">Create</button></div><div id="server-list" class="feed-item"><small>No servers created in this demo yet.</small></div></div><div class="card"><b>Server template store</b><p class="muted">Starter layouts for gaming, trading and community servers.</p><div class="feed-item"><b>Trading Community</b><p>Announcements, market-chat, signals</p><button class="button" onclick="buy(25,'Trading server template')">Buy $25</button></div><div class="feed-item"><b>Gaming Community</b><p>General, looking-for-group, events</p><button class="button" onclick="buy(20,'Gaming server template')">Buy $20</button></div></div></div>`,
-pump:()=>`<p class="page-intro">A fictional token launchpad with simulated balances and a simplified bonding-curve demo. No real blockchain or wallet connection.</p><div class="notice">Leaderboard is intentionally located only inside this Pump.fun module. Token prices and rewards in this prototype are illustrative.</div><div class="grid two" style="margin-top:14px"><div class="card"><b>Demo sandbox credits</b><div class="stat-value">${money(state.balance)}</div><span class="muted">Local-only credits · not your account wallet</span><div class="section-head"><h2>Create token</h2></div><div class="form"><input id="token-name" class="input" placeholder="Token name"><input id="token-symbol" class="input" placeholder="Ticker"></div><div class="form"><input id="token-desc" class="input" placeholder="Description"></div><button class="button" onclick="createToken()">Launch simulated token · $100</button></div><div class="card"><b>Token discovery</b><div id="tokens">${tokenList()}</div></div></div><div class="section-head"><h2>Pump.fun leaderboard</h2><span>Demo ranking</span></div><div class="card"><table class="table"><tr><th>RANK</th><th>CREATOR</th><th>VIRTUAL REWARDS</th></tr><tr><td>#1</td><td>@demo_creator</td><td class="positive">$1,250</td></tr><tr><td>#2</td><td>@moonbuilder</td><td>$840</td></tr><tr><td>#3</td><td>@testtrader</td><td>$420</td></tr></table></div>`,
-trading:()=>`<p class="page-intro">Market prices below are mock data for interface testing, not real-time quotes. Real market feeds will be connected in a later phase.</p><div class="card"><div class="section-head"><h2>Market overview</h2><span>DEMO DATA</span></div>${marketTable()}<div class="notice">Trading execution, chart history, order book, stop loss and take profit require the secure backend. This screen is a frontend prototype.</div></div>`,
-market:()=>`<p class="page-intro">A player-to-player marketplace for virtual goods and services.</p><div class="grid app-grid"><div class="card"><div class="app-icon">📱</div><b>Virtual Telegram number</b><p>Fictional in-game phone identity.</p><span class="tag">$5</span></div><div class="card"><div class="app-icon">✦</div><b>X Premium</b><p>Premium profile features and badge.</p><span class="tag">$15</span></div><div class="card"><div class="app-icon">◉</div><b>Discord template</b><p>Ready-made server structure.</p><span class="tag">$20+</span></div></div><div class="section-head"><h2>Player services</h2></div><div class="card"><p class="muted">Player listings, escrow, delivery confirmation and dispute handling will be added after account and backend systems are ready.</p></div>`
-};
-function xPostHTML(p){
- const id=esc(p.id||"");
- const initial=esc((p.displayName||p.handle||"M").slice(0,1).toUpperCase());
- const avatar=p.avatarUrl?("<div class=\"x-post-avatar\" style=\"background-image:url(\'"+esc(p.avatarUrl)+"\');background-size:cover;background-position:center\"></div>"):"<div class=\"x-post-avatar\">"+initial+"</div>";
- const follow=p.canFollow?("<button class=\"x-follow-button "+(p.following?"is-following":"")+"\" onclick=\"toggleXFollow(\'"+id+"\',\'"+esc(p.authorId)+"\')\">"+(p.following?"Following":"Follow")+"</button>"):"";
- return "<article class=\"x-post\" data-post-id=\""+id+"\">"+avatar+"<div class=\"x-post-main\"><div class=\"x-post-heading\"><b>"+esc(p.displayName||p.handle||"Player")+"</b><span class=\"x-handle\">@"+esc(p.handle||"player")+"</span><span class=\"x-dot\">·</span><span class=\"x-time\">"+esc(p.time||"now")+"</span>"+follow+"<button class=\"x-more\" aria-label=\"More\" onclick=\"demoNotice()\">···</button></div><p>"+esc(p.text)+"</p><div class=\"x-actions\"><button onclick=\"replyToXPost(\'"+id+"\')\" aria-label=\"Reply\">▢ <span>"+(p.replyCount||0)+"</span></button><button class=\""+(p.reposted?"x-action-active":"")+"\" onclick=\"toggleXAction(\'repost\',\'"+id+"\')\" aria-label=\"Repost\">⇄ <span>"+(p.repostCount||0)+"</span></button><button class=\""+(p.liked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'like\',\'"+id+"\')\" aria-label=\"Like\">♡ <span>"+(p.likeCount||0)+"</span></button><button aria-label=\"Views\">▥ <span>—</span></button><button class=\""+(p.bookmarked?"x-action-active":"")+"\" onclick=\"toggleXAction(\'bookmark\',\'"+id+"\')\" aria-label=\"Bookmark\">♧</button><button onclick=\"navigator.clipboard?.writeText(location.href)\" aria-label=\"Share\">↗</button></div></div></article>";
-}
+  const DB_NAME = "memeverse-terminal";
+  const DB_VERSION = 1;
+  const STARTING_CASH = 100000;
+  const FEE_RATE = 0.001;
+  const $ = (id) => document.getElementById(id);
+  const money = (n, digits = 2) => new Intl.NumberFormat("en-US", {style:"currency",currency:"USD",minimumFractionDigits:digits,maximumFractionDigits:digits}).format(Number(n) || 0);
+  const number = (n, digits = 2) => new Intl.NumberFormat("en-US", {minimumFractionDigits:digits,maximumFractionDigits:digits}).format(Number(n) || 0);
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "mv-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+  const escapeHtml = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-function setXFeedMessage(message){const feed=document.getElementById("feed");if(feed)feed.innerHTML="<div class=\"x-feed-state\">"+esc(message)+"</div>"}
-function relativeXTime(value){const ms=Date.now()-new Date(value).getTime();if(!Number.isFinite(ms))return "now";const m=Math.max(0,Math.floor(ms/60000));if(m<1)return "now";if(m<60)return m+"m";const h=Math.floor(m/60);if(h<24)return h+"h";return Math.floor(h/24)+"d"}
-async function loadXFeed(mode=state.xFeedMode||"For you"){
- const feed=document.getElementById("feed");if(!feed)return;const client=xClient();if(!client){setXFeedMessage("Supabase belum terhubung.");return}
- if(state.xFeedLoading)return;state.xFeedLoading=true;feed.innerHTML="<div class=\"x-feed-state\">Loading MEMEVERSE posts…</div>";
- try{
-  const {data:{user}}=await client.auth.getUser();
-  let query=client.from("x_posts").select("id,author_id,body,created_at,profile:profiles!x_posts_author_id_fkey(handle,display_name,avatar_url)").order("created_at",{ascending:false}).limit(50);
-  if(mode==="Following"){
-   if(!user){setXFeedMessage("Login untuk melihat feed Following.");return}
-   const {data:follows,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id);if(error)throw error;
-   const ids=(follows||[]).map(x=>x.followed_id);if(!ids.length){setXFeedMessage("Belum ada akun yang kamu ikuti. Mulai follow pemain lain!");return}
-   query=query.in("author_id",ids)
+  const ASSETS = [
+    {symbol:"BTCUSD",name:"Bitcoin",category:"Crypto",price:67420,volatility:0.0018,precision:2},
+    {symbol:"ETHUSD",name:"Ethereum",category:"Crypto",price:3421.75,volatility:0.0022,precision:2},
+    {symbol:"SOLUSD",name:"Solana",category:"Crypto",price:168.27,volatility:0.0032,precision:3},
+    {symbol:"BNBUSD",name:"BNB",category:"Crypto",price:612.40,volatility:0.0021,precision:2},
+    {symbol:"AAPL",name:"Apple Inc.",category:"Stocks",price:228.35,volatility:0.0011,precision:2},
+    {symbol:"NVDA",name:"NVIDIA",category:"Stocks",price:142.80,volatility:0.0020,precision:2},
+    {symbol:"MSFT",name:"Microsoft",category:"Stocks",price:415.25,volatility:0.0010,precision:2},
+    {symbol:"TSLA",name:"Tesla",category:"Stocks",price:248.50,volatility:0.0025,precision:2},
+    {symbol:"EURUSD",name:"Euro / US Dollar",category:"Forex",price:1.08425,volatility:0.00025,precision:5},
+    {symbol:"GBPUSD",name:"British Pound / US Dollar",category:"Forex",price:1.29340,volatility:0.00028,precision:5},
+    {symbol:"USDJPY",name:"US Dollar / Japanese Yen",category:"Forex",price:151.820,volatility:0.00022,precision:3},
+    {symbol:"AUDUSD",name:"Australian Dollar / US Dollar",category:"Forex",price:0.65380,volatility:0.00025,precision:5}
+  ];
+
+  const state = {
+    db:null, cash:STARTING_CASH, selected:"BTCUSD", category:"All", timeframe:"1m",
+    prices:{}, candles:{}, watchlist:["BTCUSD","ETHUSD","SOLUSD","AAPL","EURUSD"],
+    orders:[], positions:[], trades:[], activeView:"overview", tickTimer:null,
+    chartTimer:null, chartRange:"1D", toastTimer:null, marketPaused:false
+  };
+
+  function openDB() {
+    return new Promise((resolve,reject) => {
+      if (!("indexedDB" in window)) { reject(new Error("IndexedDB tidak tersedia di browser ini.")); return; }
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        ["settings","orders","positions","trades","watchlist","candles"].forEach((name) => {
+          if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, {keyPath:"id"});
+        });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("Gagal membuka database lokal."));
+    });
   }
-  if(mode==="Bookmarks"){
-   if(!user){setXFeedMessage("Login untuk melihat bookmark.");return}
-   const {data:marks,error}=await client.from("x_bookmarks").select("post_id").eq("user_id",user.id).order("created_at",{ascending:false});if(error)throw error;
-   const ids=(marks||[]).map(x=>x.post_id);if(!ids.length){setXFeedMessage("Belum ada postingan yang disimpan.");return}
-   query=query.in("id",ids)
+
+  function store(name, mode, action) {
+    return new Promise((resolve,reject) => {
+      const tx = state.db.transaction(name, mode);
+      const req = action(tx.objectStore(name));
+      tx.oncomplete = () => resolve(req ? req.result : true);
+      tx.onerror = () => reject(tx.error || new Error("Database lokal gagal diperbarui."));
+      tx.onabort = () => reject(tx.error || new Error("Operasi database dibatalkan."));
+    });
   }
-  const {data:posts,error}=await query;if(error)throw error;
-  const ids=(posts||[]).map(p=>p.id);if(!ids.length){setXFeedMessage("Belum ada postingan. Jadilah yang pertama berbagi sesuatu!");return}
-  let likes=[],reposts=[],replies=[],marks=[],follows=[];
-  if(user){
-   const results=await Promise.all([
-    client.from("x_likes").select("post_id,user_id").in("post_id",ids),
-    client.from("x_reposts").select("post_id,user_id").in("post_id",ids),
-    client.from("x_replies").select("id,post_id").in("post_id",ids),
-    client.from("x_bookmarks").select("post_id").eq("user_id",user.id).in("post_id",ids),
-    client.from("x_follows").select("followed_id").eq("follower_id",user.id)
-   ]);
-   for(const r of results)if(r.error)throw r.error;
-   [likes,reposts,replies,marks,follows]=results.map(r=>r.data||[])
-  }else{
-   const r=await client.from("x_replies").select("id,post_id").in("post_id",ids);if(!r.error)replies=r.data||[]
+  const getAll = (name) => store(name,"readonly",(s) => s.getAll());
+  const put = (name,value) => store(name,"readwrite",(s) => s.put(value));
+  const clearStore = (name) => store(name,"readwrite",(s) => s.clear());
+
+  function seedCandles(asset) {
+    const now = Date.now();
+    let price = asset.price;
+    const rows = [];
+    for (let i=119;i>=0;i--) {
+      const close = price;
+      const move = (Math.random()-0.49) * asset.volatility * 5;
+      price = Math.max(asset.price * 0.05, price * (1+move));
+      const open = close;
+      rows.push({time:now-i*60000,open:open,close:price,high:Math.max(open,price)*(1+Math.random()*asset.volatility),low:Math.min(open,price)*(1-Math.random()*asset.volatility),volume:Math.random()*100});
+    }
+    state.candles[asset.symbol] = rows;
+    state.prices[asset.symbol] = rows[rows.length-1].close;
   }
-  const count=(arr,id)=>arr.filter(x=>x.post_id===id).length;
-  const liked=new Set(likes.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
-  const reposted=new Set(reposts.filter(x=>x.user_id===user?.id).map(x=>x.post_id));
-  const bookmarked=new Set(marks.map(x=>x.post_id));
-  const following=new Set(follows.map(x=>x.followed_id));
-  state.posts=(posts||[]).map(p=>({
-   id:p.id,authorId:p.author_id,handle:p.profile?.handle||"player",
-   displayName:p.profile?.display_name||p.profile?.handle||"Player",
-   avatarUrl:p.profile?.avatar_url||null,text:p.body,time:relativeXTime(p.created_at),
-   likeCount:count(likes,p.id),repostCount:count(reposts,p.id),replyCount:count(replies,p.id),
-   liked:liked.has(p.id),reposted:reposted.has(p.id),bookmarked:bookmarked.has(p.id),
-   following:following.has(p.author_id),canFollow:!!user&&p.author_id!==user.id
-  }));
-  feed.innerHTML=state.posts.map(xPostHTML).join("");
-  if(!state.xRealtimeChannel){
-   state.xRealtimeChannel=client.channel("x-network-live-feed")
-    .on("postgres_changes",{event:"INSERT",schema:"public",table:"x_posts"},()=>{
-     if(document.body.dataset.currentPage==="x"&&state.xFeedMode==="For you")loadXFeed("For you")
-    }).subscribe()
+
+  async function persistSnapshot() {
+    return new Promise((resolve,reject)=>{
+      const names=["settings","orders","positions","trades","watchlist","candles"];
+      const tx=state.db.transaction(names,"readwrite");
+      names.forEach((name)=>tx.objectStore(name).clear());
+      tx.objectStore("settings").put({id:"account",cash:state.cash,selected:state.selected,category:state.category,timeframe:state.timeframe,updatedAt:Date.now()});
+      state.orders.forEach((x)=>tx.objectStore("orders").put({...x,id:x.id}));
+      state.positions.forEach((x)=>tx.objectStore("positions").put({...x,id:x.symbol}));
+      state.trades.slice(0,500).forEach((x)=>tx.objectStore("trades").put({...x,id:x.id}));
+      tx.objectStore("watchlist").put({id:"symbols",symbols:state.watchlist});
+      Object.keys(state.candles).forEach((symbol)=>tx.objectStore("candles").put({id:symbol,rows:state.candles[symbol]}));
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error||new Error("Failed to save local trading state."));
+      tx.onabort=()=>reject(tx.error||new Error("Local trading save was aborted."));
+    });
   }
- }catch(error){setXFeedMessage("Gagal memuat feed: "+error.message)}
- finally{state.xFeedLoading=false}
-}
-async function toggleXAction(action,postId){
- const client=xClient();const {data:{user}}=await client.auth.getUser();
- if(!user){openAuth("login");setAuthMessage("Login untuk berinteraksi dengan postingan.",true);return}
- const tables={like:{table:"x_likes",key:"user_id"},repost:{table:"x_reposts",key:"user_id"},bookmark:{table:"x_bookmarks",key:"user_id"}};
- const cfg=tables[action];if(!cfg)return;
- const {data:existing,error:readError}=await client.from(cfg.table).select("post_id").eq(cfg.key,user.id).eq("post_id",postId).maybeSingle();
- if(readError){setXFeedMessage(readError.message);return}
- const result=existing
-  ?await client.from(cfg.table).delete().eq(cfg.key,user.id).eq("post_id",postId)
-  :await client.from(cfg.table).insert({[cfg.key]:user.id,post_id:postId});
- if(result.error){setXFeedMessage("Aksi gagal: "+result.error.message);return}
- await loadXFeed(state.xFeedMode)
-}
-async function replyToXPost(postId){
- const client=xClient();const {data:{user}}=await client.auth.getUser();
- if(!user){openAuth("login");setAuthMessage("Login untuk membalas postingan.",true);return}
- const body=prompt("Tulis balasan (maks. 500 karakter):");if(!body?.trim())return;
- const {error}=await client.from("x_replies").insert({post_id:postId,author_id:user.id,body:body.trim().slice(0,500)});
- if(error){setXFeedMessage("Balasan gagal: "+error.message);return}
- await loadXFeed(state.xFeedMode)
-}
-async function toggleXFollow(postId,authorId){
- const client=xClient();const {data:{user}}=await client.auth.getUser();
- if(!user){openAuth("login");setAuthMessage("Login untuk mengikuti pemain.",true);return}
- const {data:existing,error}=await client.from("x_follows").select("followed_id").eq("follower_id",user.id).eq("followed_id",authorId).maybeSingle();
- if(error){setXFeedMessage(error.message);return}
- const result=existing
-  ?await client.from("x_follows").delete().eq("follower_id",user.id).eq("followed_id",authorId)
-  :await client.from("x_follows").insert({follower_id:user.id,followed_id:authorId});
- if(result.error){setXFeedMessage(result.error.message);return}
- await loadXFeed(state.xFeedMode)
-}
 
-function setXTab(tab){document.querySelectorAll("[data-x-tab]").forEach(b=>b.classList.toggle("active",b.dataset.xTab===tab));if(tab==="Add"){document.getElementById("post-input")?.focus();return}if(tab==="Crypto"){demoNotice();return}state.xFeedMode=tab;loadXFeed(tab)}
-function setXNav(button,label){document.querySelectorAll(".x-bottom-nav button").forEach(b=>b.classList.remove("active"));button.classList.add("active");if(label==="Home"){state.xFeedMode="For you";loadXFeed("For you");return}if(label==="Bookmarks"){state.xFeedMode="Bookmarks";loadXFeed("Bookmarks");return}if(label==="Profile"){openXProfile();return}demoNotice()}
-function openXProfile(){document.getElementById("x-profile-view").hidden=false;loadXProfile()}
-function closeXProfile(){document.getElementById("x-profile-view").hidden=true;document.getElementById("x-profile-edit-view").hidden=true}
-function app(icon,name,desc,page){return `<div class="card app-card" onclick="go('${page}')"><div class="app-icon">${icon}</div><b>${name}</b><p>${desc}</p></div>`}
-function postHTML(p){return `<div class="feed-item"><b>${esc(p.user)}</b> <small>· ${esc(p.time)}</small><p>${esc(p.text)}</p></div>`}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function marketTable(){return `<table class="table"><tr><th>ASSET</th><th>PRICE</th><th>24H</th><th>MARKET</th></tr><tr><td class="asset">BTC <small>Bitcoin</small></td><td>$67,420</td><td class="positive">+2.4%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">ETH <small>Ethereum</small></td><td>$3,510</td><td class="positive">+1.2%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">SOL <small>Solana</small></td><td>$182</td><td class="negative">-0.8%</td><td><span class="tag">Crypto</span></td></tr><tr><td class="asset">AAPL <small>Apple</small></td><td>$221</td><td class="positive">+0.6%</td><td><span class="tag">Stock</span></td></tr><tr><td class="asset">EUR/USD <small>Euro / US Dollar</small></td><td>1.0842</td><td class="negative">-0.1%</td><td><span class="tag">Forex</span></td></tr></table>`}
-function tokenList(){return state.tokens.length?state.tokens.map(t=>`<div class="feed-item"><b>${esc(t.name)} (${esc(t.symbol)})</b><p>${esc(t.desc||"Community token")} · <span class="positive">${money(t.price)}</span></p></div>`).join(""):"<p class='muted'>No tokens yet. Launch the first one.</p>"}
-function go(page){const names={overview:"MEMEVERSE",x:"X",telegram:"Telegram",discord:"Discord",pump:"Pump.fun",trading:"Trading",market:"Marketplace"};document.body.classList.toggle("x-mode",page==="x");document.body.classList.toggle("app-open",page!=="overview");document.body.dataset.currentPage=page;document.querySelectorAll(".nav-item,.dock-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));title.textContent=names[page]||"MEMEVERSE";const view=pages[page]();content.innerHTML=page==="overview"||page==="x"||!window.matchMedia("(max-width: 800px)").matches?view:"<div class=\"mobile-app-screen\"><header class=\"mobile-app-header\"><button class=\"mobile-back\" onclick=\"goHome()\" aria-label=\"Back to home\">‹</button><div><b>"+(names[page]||"App")+"</b><small>MEMEVERSE APP</small></div><span class=\"mobile-app-balance\">"+"DEMO · "+money(state.balance)+"</span></header><div class=\"mobile-app-content\">"+view+"</div></div>";if(page==="x")loadXFeed(state.xFeedMode);window.scrollTo(0,0)}function goHome(){go("overview")}
-function renderWalletBalance(){const el=document.getElementById("top-balance");if(!el)return;el.textContent=state.walletBalance===null?"Sign in to view":money(state.walletBalance)+" "+state.walletCurrency;}
-async function loadWalletBalance(session){const request=++state.walletRequest;const el=document.getElementById("top-balance");if(!session?.user){state.walletBalance=null;state.walletCurrency="USDV";if(el)el.textContent="Sign in to view";return}const client=xClient();if(!client){if(el)el.textContent="Unavailable";return}if(el)el.textContent="Loading…";try{const {data,error}=await client.from("wallets").select("balance,currency").eq("user_id",session.user.id).maybeSingle();if(request!==state.walletRequest)return;if(error)throw error;if(!data){state.walletBalance=null;if(el)el.textContent="Wallet not initialized";return}state.walletBalance=Number(data.balance);state.walletCurrency=data.currency||"USDV";renderWalletBalance()}catch(error){if(request!==state.walletRequest)return;state.walletBalance=null;if(el)el.textContent="Unavailable";console.error("Wallet balance load failed:",error.message)}}
-function buy(cost,item){if(state.balance<cost){alert("Saldo virtual tidak cukup.");return}state.balance-=cost;alert(item+" berhasil dibeli dalam demo. Saldo: "+money(state.balance));go(document.querySelector(".nav-item.active")?.dataset.page||"overview")}
-async function addPost(){
- const el=document.getElementById("post-input");const body=el?.value.trim();if(!body)return;
- const client=xClient();if(!client){alert("Supabase belum tersedia.");return}
- const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){openAuth("login");setAuthMessage("Login diperlukan untuk membuat postingan.",true);return}
- const button=document.querySelector(".x-post-button");if(button){button.disabled=true;button.textContent="Posting…"}
- const {error}=await client.from("x_posts").insert({author_id:user.id,body});
- if(button){button.disabled=false;button.textContent="Posting"}
- if(error){setXFeedMessage("Posting gagal: "+error.message);return}
- el.value="";const count=document.getElementById("x-char-count");if(count)count.textContent="500";await loadXFeed(state.xFeedMode)
-}
+  async function hydrate() {
+    const [settings,orders,positions,trades,watch,candles] = await Promise.all([
+      getAll("settings"),getAll("orders"),getAll("positions"),getAll("trades"),getAll("watchlist"),getAll("candles")
+    ]);
+    const account = settings.find((x)=>x.id==="account");
+    if (account) {
+      state.cash = Number(account.cash);
+      state.selected = account.selected || state.selected;
+      state.category = account.category || "All";
+      state.timeframe = account.timeframe || "1m";
+    }
+    state.orders = orders || [];
+    state.positions = positions || [];
+    state.trades = (trades || []).sort((a,b)=>b.timestamp-a.timestamp);
+    const savedWatch = (watch || []).find((x)=>x.id==="symbols");
+    if (savedWatch && Array.isArray(savedWatch.symbols)) state.watchlist = savedWatch.symbols;
+    (candles || []).forEach((x)=>{state.candles[x.id]=x.rows; if(x.rows && x.rows.length) state.prices[x.id]=x.rows[x.rows.length-1].close;});
+    ASSETS.forEach((asset)=>{if(!state.candles[asset.symbol])seedCandles(asset);});
+  }
 
-function createServer(){const n=document.getElementById("server-name").value.trim();if(!n)return alert("Masukkan nama server.");document.getElementById("server-list").innerHTML=`<b>◉ ${esc(n)}</b><p class="muted"># general · Server demo created</p>`}
-function createToken(){const name=document.getElementById("token-name").value.trim(),symbol=document.getElementById("token-symbol").value.trim().toUpperCase(),desc=document.getElementById("token-desc").value.trim();if(!name||!symbol)return alert("Isi nama dan ticker token.");if(state.balance<100)return alert("Saldo virtual tidak cukup.");state.balance-=100;state.tokens.unshift({name,symbol,desc,price:0.0001});go("pump")}
-function demoNotice(){alert("Aksi ini masih berupa demo frontend. Data online akan aktif setelah backend dipasang.")}
-document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});document.getElementById("mobile-dock")?.addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)go(b.dataset.page)});
-go("overview");
+  function currentAsset() { return ASSETS.find((x)=>x.symbol===state.selected) || ASSETS[0]; }
+  function priceOf(symbol) { return Number(state.prices[symbol] || ASSETS.find((x)=>x.symbol===symbol)?.price || 0); }
+  function positionOf(symbol) { return state.positions.find((x)=>x.symbol===symbol); }
+  function positionValue(p) { return p.quantity * priceOf(p.symbol); }
+  function unrealized(p) { return (priceOf(p.symbol)-p.averagePrice)*p.quantity; }
+  function totalEquity() { return state.cash + state.positions.reduce((sum,p)=>sum+positionValue(p),0); }
+  function totalUnrealized() { return state.positions.reduce((sum,p)=>sum+unrealized(p),0); }
+  function totalRealized() { return state.trades.reduce((sum,t)=>sum+(t.realizedPnl || 0),0); }
 
-// X profile editor: requires window.supabaseClient configured with the signed-in Supabase session.
-function xClient(){return window.supabaseClient||null}
-function setXProfileStatus(message,error=false){const el=document.getElementById("x-profile-status");if(el){el.textContent=message;el.classList.toggle("negative",error);el.classList.toggle("positive",!error)}}
-function updateXProfilePreview(){const value=id=>document.getElementById(id)?.value?.trim()||"";const name=value("x-display-name")||"Your display name",handle=value("x-handle")||"username",bio=value("x-bio"),location=value("x-location"),website=value("x-website"),birthday=value("x-birthday"),showBirthday=document.getElementById("x-birthday-public")?.checked;document.getElementById("profile-preview-name").textContent=name;document.getElementById("profile-preview-handle").textContent="@"+handle.replace(/^@/,"");document.getElementById("profile-preview-bio").textContent=bio||"Your bio will appear here.";document.getElementById("profile-preview-location").textContent=location?"⌖ "+location:"⌖ Add your location";const link=document.getElementById("profile-preview-website");link.textContent=website?"↗ "+website.replace("https://","").replace("http://",""):"↗ Add website";const birthdayEl=document.getElementById("profile-preview-birthday");birthdayEl.hidden=!(birthday&&showBirthday);birthdayEl.textContent=birthday&&showBirthday?"🎂 "+new Date("2000-"+birthday.slice(5)+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"}):""}
-function previewXImage(input,target,isBanner){const file=input.files?.[0];if(!file)return;if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024){setXProfileStatus("Image must be PNG, JPG or WebP and no larger than 2 MB.",true);input.value="";return}const reader=new FileReader();reader.onload=()=>{const ids=isBanner?["profile-banner-preview","x-edit-banner-preview"]:["profile-avatar-preview","x-edit-avatar-preview"];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.style.backgroundImage="url("+reader.result+")";el.textContent=""}});if(isBanner)state.xBannerFile=file;else state.xAvatarFile=file};reader.readAsDataURL(file)}
-function openXProfileEditor(){const profile=document.getElementById("x-profile-view"),editor=document.getElementById("x-profile-edit-view");if(profile)profile.hidden=true;if(editor)editor.hidden=false;loadXProfile();window.scrollTo(0,0)}
-function closeXProfileEditor(){const profile=document.getElementById("x-profile-view"),editor=document.getElementById("x-profile-edit-view");if(editor)editor.hidden=true;if(profile)profile.hidden=false;window.scrollTo(0,0)}
-function toggleXProfileEditor(){openXProfileEditor()}
-async function loadXProfile(){const client=xClient();if(!client){setXProfileStatus("Supabase client belum dikonfigurasi. Profil belum tersambung ke akun online.",true);return}const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){setXProfileStatus("Silakan login ke MEMEVERSE terlebih dahulu untuk mengedit profil.",true);return}const [{data:profile,error},{data:privateProfile,error:privateError}]=await Promise.all([client.from("profiles").select("handle,display_name,bio,location,website_url,avatar_url,banner_url,birthday_public").eq("id",user.id).single(),client.from("profile_private").select("birthday").eq("user_id",user.id).maybeSingle()]);if(error){setXProfileStatus("Gagal memuat profil: "+error.message,true);return}if(privateError){setXProfileStatus("Gagal memuat data privat profil: "+privateError.message,true);return}const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||""};set("x-display-name",profile.display_name);set("x-handle",profile.handle);set("x-bio",profile.bio);set("x-location",profile.location);set("x-website",profile.website_url);set("x-birthday",privateProfile?.birthday);document.getElementById("x-birthday-public").checked=!!profile.birthday_public;state.xProfile={...profile,userId:user.id};if(profile.avatar_url){["profile-avatar-preview","x-edit-avatar-preview"].forEach(id=>{const el=document.getElementById(id);if(el){el.style.backgroundImage="url('"+profile.avatar_url+"')";el.textContent=""}});document.querySelectorAll(".x-avatar").forEach(el=>{el.style.backgroundImage="url('"+profile.avatar_url+"')";el.textContent=""})}if(profile.banner_url){["profile-banner-preview","x-edit-banner-preview"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.backgroundImage="url('"+profile.banner_url+"')"})}updateXProfilePreview();setXProfileStatus("Profil berhasil dimuat dari akun MEMEVERSE.")}
-async function uploadXProfileImage(client,userId,file,kind){if(!file)return null;const ext=file.name.split(".").pop().toLowerCase();const path=`${userId}/${kind}-${Date.now()}.${ext}`;const {error}=await client.storage.from("profile-media").upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});if(error)throw error;const {data}=client.storage.from("profile-media").getPublicUrl(path);return data.publicUrl}
-async function saveXProfile(){const client=xClient();if(!client){setXProfileStatus("Supabase belum dikonfigurasi. Tidak ada perubahan online yang disimpan.",true);return}const {data:{user},error:authError}=await client.auth.getUser();if(authError||!user){setXProfileStatus("Login diperlukan sebelum menyimpan profil.",true);return}const get=id=>document.getElementById(id).value.trim();const handle=get("x-handle").replace(/^@/,"").toLowerCase(),displayName=get("x-display-name"),bio=get("x-bio"),location=get("x-location"),website=get("x-website"),birthday=document.getElementById("x-birthday").value||null;if(!/^[a-z0-9_]{3,24}$/.test(handle)){setXProfileStatus("Username harus 3–24 karakter: huruf kecil, angka, atau underscore.",true);return}if(!displayName||displayName.length>40||bio.length>160||location.length>80){setXProfileStatus("Periksa display name, bio, dan location.",true);return}if(website&&!(website.startsWith("https://")||website.startsWith("http://"))){setXProfileStatus("Website harus memakai URL lengkap yang diawali https:// atau http://.",true);return}const button=document.getElementById("x-profile-save-top");if(button){button.disabled=true;button.textContent="Saving...";}try{const [avatarUrl,bannerUrl]=await Promise.all([uploadXProfileImage(client,user.id,state.xAvatarFile,"avatar"),uploadXProfileImage(client,user.id,state.xBannerFile,"banner")]);const showBirthday=document.getElementById("x-birthday-public").checked;const update={handle,display_name:displayName,bio,location,website_url:website||null,birthday_public:showBirthday&&birthday?birthday.slice(5):null};if(avatarUrl)update.avatar_url=avatarUrl;if(bannerUrl)update.banner_url=bannerUrl;const {error}=await client.from("profiles").update(update).eq("id",user.id);if(error)throw error;const {error:privateError}=await client.from("profile_private").upsert({user_id:user.id,birthday,updated_at:new Date().toISOString()},{onConflict:"user_id"});if(privateError)throw privateError;state.xAvatarFile=null;state.xBannerFile=null;state.xProfile={...state.xProfile,...update,avatar_url:avatarUrl||state.xProfile.avatar_url,banner_url:bannerUrl||state.xProfile.banner_url};setXProfileStatus("Profil X berhasil disimpan.");closeXProfileEditor();}catch(error){setXProfileStatus(error.message||"Gagal menyimpan profil.",true)}finally{if(button){button.disabled=false;button.textContent="Save"}}}
+  function toast(message, type="success") {
+    const el=$("toast"); if(!el)return;
+    el.textContent=message; el.className="toast show "+type;
+    clearTimeout(state.toastTimer); state.toastTimer=setTimeout(()=>{el.className="toast";},3200);
+  }
 
-let authMode="login";
-function setAuthMessage(message,isError=false){const el=document.getElementById("auth-message");if(el){el.textContent=message;el.classList.toggle("negative",isError);el.classList.toggle("positive",!isError)}}
-function openAuth(mode="login"){authMode=mode;const modal=document.getElementById("auth-modal");if(!modal)return;modal.hidden=false;document.getElementById("auth-title").textContent=mode==="signup"?"Create your MEMEVERSE account":mode==="reset"?"Reset your password":mode==="update-password"?"Choose a new password":"Welcome back";document.getElementById("auth-name-field").hidden=mode!=="signup";document.getElementById("auth-email-field").hidden=mode==="update-password";document.getElementById("auth-email").required=mode!=="update-password";document.getElementById("auth-password-field").hidden=mode==="reset";document.getElementById("auth-password").autocomplete=(mode==="signup"||mode==="update-password")?"new-password":"current-password";document.getElementById("auth-password").required=mode!=="reset";document.getElementById("auth-submit").textContent=mode==="signup"?"Create account":mode==="reset"?"Send reset link":mode==="update-password"?"Update password":"Sign in";document.getElementById("auth-switch").textContent=mode==="signup"?"Already have an account? Sign in":mode==="reset"?"Back to sign in":"New to MEMEVERSE? Create account";document.getElementById("auth-forgot").hidden=mode!=="login";document.getElementById("auth-form").hidden=mode==="update-password"?false:!!window.__memeverseSession?.user;document.getElementById("auth-signout").hidden=mode==="update-password"||!window.__memeverseSession?.user;document.getElementById("auth-switch").hidden=mode==="update-password"||!!window.__memeverseSession?.user;setAuthMessage("");}
-function closeAuth(){const modal=document.getElementById("auth-modal");if(modal)modal.hidden=true}
-function switchAuthMode(){openAuth(authMode==="login"?"signup":"login")}
-async function submitAuth(event){event.preventDefault();const client=xClient();if(!client){setAuthMessage("Koneksi Supabase belum siap. Muat ulang halaman dan coba lagi.",true);return}const email=document.getElementById("auth-email").value.trim();const password=document.getElementById("auth-password").value;const displayName=document.getElementById("auth-display-name").value.trim();const button=document.getElementById("auth-submit");button.disabled=true;try{if(authMode==="signup"){if(password.length<8)throw new Error("Password minimal 8 karakter.");const {data,error}=await client.auth.signUp({email,password,options:{data:{display_name:displayName||"New Player"}}});if(error)throw error;if(data.session){setAuthMessage("Akun berhasil dibuat dan kamu sudah login.");}else{setAuthMessage("Akun dibuat. Cek email untuk verifikasi sebelum login.");}document.getElementById("auth-password").value="";}else if(authMode==="reset"){const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});if(error)throw error;setAuthMessage("Jika email terdaftar, tautan reset akan dikirim. Periksa inbox dan folder spam.");}else if(authMode==="update-password"){if(password.length<8)throw new Error("Password minimal 8 karakter.");const {error}=await client.auth.updateUser({password});if(error)throw error;setAuthMessage("Password berhasil diperbarui.");document.getElementById("auth-password").value="";}else{const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;setAuthMessage("Login berhasil.");document.getElementById("auth-password").value="";} }catch(error){setAuthMessage(error.message||"Autentikasi gagal. Coba lagi.",true)}finally{button.disabled=false}}
-async function signOutMEMEVERSE(){const client=xClient();if(!client)return;const {error}=await client.auth.signOut();if(error){alert("Gagal logout: "+error.message);return}state.xProfile={};state.xAvatarFile=null;state.xBannerFile=null;closeXProfile();setAuthMessage("Kamu sudah logout.");}
-function updateAuthUI(session){const user=session?.user;Promise.resolve().then(()=>loadWalletBalance(session));const launcher=document.getElementById("auth-launcher");if(launcher)launcher.textContent=user?(user.email||"Account")+" · Sign out":"Sign in / Create account";const account=document.getElementById("auth-account-state");if(account)account.textContent=user?"Signed in as "+(user.email||"MEMEVERSE player"):"Not signed in";const signout=document.getElementById("auth-signout");if(signout)signout.hidden=!user;const switcher=document.getElementById("auth-switch");if(switcher)switcher.hidden=!!user;const form=document.getElementById("auth-form");if(form)form.hidden=!!user;const modalTitle=document.getElementById("auth-title");if(user&&modalTitle)modalTitle.textContent="Your MEMEVERSE account";}
-function initMEMEVERSEAuth(){const client=xClient();if(!client){setAuthMessage("Supabase belum dikonfigurasi.",true);return}client.auth.onAuthStateChange((event,session)=>{window.__memeverseSession=session;updateAuthUI(session);if(document.body.dataset.currentPage==="x")loadXFeed(state.xFeedMode);if(event==="PASSWORD_RECOVERY")openAuth("update-password")});client.auth.getSession().then(({data,error})=>{if(error){setAuthMessage("Tidak dapat memulihkan sesi: "+error.message,true);return}window.__memeverseSession=data.session;updateAuthUI(data.session)});}
-document.getElementById("auth-form")?.addEventListener("submit",submitAuth);
-document.getElementById("auth-launcher")?.addEventListener("click",()=>{if(window.supabaseClient){const label=document.getElementById("auth-launcher").textContent;if(window.__memeverseSession?.user){signOutMEMEVERSE();return}openAuth("login")}else openAuth("login")});
-document.getElementById("auth-switch")?.addEventListener("click",()=>{if(authMode==="reset")openAuth("login");else switchAuthMode()});
-document.getElementById("auth-forgot")?.addEventListener("click",()=>openAuth("reset"));
-document.getElementById("auth-signout")?.addEventListener("click",signOutMEMEVERSE);
-document.getElementById("auth-close")?.addEventListener("click",closeAuth);
-initMEMEVERSEAuth();
+  function navigate(view) {
+    const allowed=["overview","markets","trade","portfolio","orders","history","settings"];
+    state.activeView=allowed.includes(view)?view:"overview";
+    document.querySelectorAll("[data-view]").forEach((el)=>el.classList.toggle("active",el.dataset.view===state.activeView));
+    document.querySelectorAll(".view").forEach((el)=>el.hidden=el.id!=="view-"+state.activeView);
+    const labels={overview:"Overview",markets:"Markets",trade:"Trading terminal",portfolio:"Portfolio",orders:"Open orders",history:"Trade history",settings:"Settings"};
+    $("page-title").textContent=labels[state.activeView];
+    $("mobile-title").textContent=labels[state.activeView];
+    renderAll();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
 
-document.addEventListener("change",e=>{if(e.target.id==="x-avatar-file")previewXImage(e.target,"x-edit-avatar-preview",false);if(e.target.id==="x-banner-file")previewXImage(e.target,"x-edit-banner-preview",true)});
-document.addEventListener("input",e=>{if(e.target.id==="post-input"){const count=document.getElementById("x-char-count");if(count)count.textContent=500-e.target.value.length}if(["x-display-name","x-handle","x-bio","x-location","x-website","x-birthday","x-birthday-public"].includes(e.target.id))updateXProfilePreview()});
+  function renderOverview() {
+    $("overview-equity").textContent=money(totalEquity());
+    $("overview-cash").textContent=money(state.cash);
+    $("overview-unrealized").textContent=money(totalUnrealized());
+    $("overview-realized").textContent=money(totalRealized());
+    const movers=ASSETS.slice(0,8).map((a)=>marketRow(a,true)).join("");
+    $("overview-markets").innerHTML=movers;
+    $("overview-positions").innerHTML=state.positions.length?state.positions.map(positionRow).join(""):'<tr><td colspan="5" class="empty-cell">No open positions. Explore markets to place a demo trade.</td></tr>';
+  }
 
+  function marketRow(asset,compact=false) {
+    const p=priceOf(asset.symbol), prev=asset.price, change=((p-prev)/prev)*100;
+    const watched=state.watchlist.includes(asset.symbol);
+    return '<tr class="market-row '+(asset.symbol===state.selected?"selected":"")+'" data-symbol="'+asset.symbol+'">'+
+      '<td><button class="watch-star '+(watched?"on":"")+'" data-watch="'+asset.symbol+'" aria-label="Toggle watchlist">★</button></td>'+
+      '<td><button class="asset-link" data-select="'+asset.symbol+'"><b>'+asset.symbol+'</b><small>'+escapeHtml(asset.name)+'</small></button></td>'+
+      '<td class="numeric">'+money(p,asset.precision>3?5:asset.precision)+'</td>'+
+      '<td class="numeric '+(change>=0?"positive":"negative")+'">'+(change>=0?"+":"")+number(change,2)+'%</td>'+
+      '<td><span class="market-type">'+asset.category+'</span></td>'+
+      (compact?"":'<td><button class="table-trade" data-trade="'+asset.symbol+'">Trade</button></td>')+'</tr>';
+  }
+
+  function positionRow(p) {
+    const pnl=unrealized(p);
+    return '<tr><td><b>'+p.symbol+'</b><small>'+escapeHtml(p.name)+'</small></td><td class="numeric">'+number(p.quantity,5)+'</td><td class="numeric">'+money(p.averagePrice,5)+'</td><td class="numeric">'+money(priceOf(p.symbol),5)+'</td><td class="numeric '+(pnl>=0?"positive":"negative")+'">'+money(pnl)+'</td></tr>';
+  }
+
+  function renderMarkets() {
+    const q=($("market-search").value||"").toLowerCase();
+    const filtered=ASSETS.filter((a)=>(state.category==="All"||a.category===state.category) && (a.symbol.toLowerCase().includes(q)||a.name.toLowerCase().includes(q)));
+    $("market-table-body").innerHTML=filtered.map((a)=>marketRow(a)).join("") || '<tr><td colspan="6" class="empty-cell">No instruments match your search.</td></tr>';
+  }
+
+  function renderTrade() {
+    const asset=currentAsset();
+    $("trade-symbol").textContent=asset.symbol;
+    $("trade-name").textContent=asset.name+" · "+asset.category+" · DEMO";
+    $("trade-price").textContent=money(priceOf(asset.symbol),asset.precision>3?5:asset.precision);
+    $("trade-change").textContent="SIMULATED PRICE";
+    $("trade-cash").textContent=money(state.cash);
+    $("order-quantity").value=$("order-quantity").value||"0.01";
+    $("order-estimate").textContent=money(Number($("order-quantity").value||0)*priceOf(asset.symbol));
+    drawChart();
+    renderWatchlist();
+  }
+
+  function renderWatchlist() {
+    $("watchlist").innerHTML=state.watchlist.map((symbol)=>{
+      const a=ASSETS.find((x)=>x.symbol===symbol); if(!a)return "";
+      const p=priceOf(symbol);
+      return '<button class="watch-item '+(symbol===state.selected?"active":"")+'" data-select="'+symbol+'"><span><b>'+symbol+'</b><small>'+a.category+'</small></span><strong>'+money(p,a.precision>3?5:a.precision)+'</strong></button>';
+    }).join("") || '<p class="muted">Your watchlist is empty.</p>';
+  }
+
+  function drawChart() {
+    const canvas=$("price-chart"); if(!canvas)return;
+    const rect=canvas.getBoundingClientRect(); if(!rect.width)return;
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    canvas.width=Math.floor(rect.width*dpr); canvas.height=Math.floor(300*dpr);
+    const ctx=canvas.getContext("2d"); ctx.scale(dpr,dpr);
+    const w=rect.width,h=300,rows=state.candles[state.selected]||[];
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle="rgba(148,163,184,.13)"; ctx.lineWidth=1;
+    for(let i=1;i<5;i++){const y=i*h/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    if(rows.length<2)return;
+    const minutes={"1m":1,"5m":5,"15m":15,"1h":60,"1d":1440}[state.timeframe]||1;
+    const grouped=[];
+    rows.forEach((c)=>{
+      const bucket=Math.floor(c.time/(minutes*60000));
+      const last=grouped[grouped.length-1];
+      if(last&&last.bucket===bucket){last.close=c.close;last.high=Math.max(last.high,c.high);last.low=Math.min(last.low,c.low);last.volume+=c.volume;}
+      else grouped.push({bucket,time:c.time,open:c.open,close:c.close,high:c.high,low:c.low,volume:c.volume});
+    });
+    const visible=grouped.slice(-120);
+    const min=Math.min(...visible.map((x)=>x.low)),max=Math.max(...visible.map((x)=>x.high)),range=max-min||1;
+    const xStep=w/visible.length,body=Math.max(2,Math.min(9,xStep*.58));
+    visible.forEach((c,i)=>{
+      const x=i*xStep+xStep/2,yo=h-(c.open-min)/range*h,yc=h-(c.close-min)/range*h;
+      const yh=h-(c.high-min)/range*h,yl=h-(c.low-min)/range*h;
+      const up=c.close>=c.open;ctx.strokeStyle=up?"#4bd6a0":"#ff7185";ctx.fillStyle=ctx.strokeStyle;
+      ctx.beginPath();ctx.moveTo(x,yh);ctx.lineTo(x,yl);ctx.stroke();
+      ctx.fillRect(x-body/2,Math.min(yo,yc),body,Math.max(1,Math.abs(yc-yo)));
+    });
+    ctx.fillStyle="#7f8da5";ctx.font="11px system-ui";ctx.fillText(money(max,2),8,14);ctx.fillText(money(min,2),8,h-8);
+  }
+
+  function renderOrders() {
+    const open=state.orders.filter((o)=>o.status==="OPEN");
+    $("open-orders-body").innerHTML=open.length?open.map((o)=>'<tr><td>'+o.symbol+'</td><td>'+o.side+'</td><td>'+o.type+'</td><td class="numeric">'+number(o.quantity,5)+'</td><td class="numeric">'+money(o.limitPrice||0,5)+'</td><td><button class="cancel-order" data-cancel="'+o.id+'">Cancel</button></td></tr>').join(""):'<tr><td colspan="6" class="empty-cell">No open orders.</td></tr>';
+  }
+
+  function renderHistory() {
+    $("history-body").innerHTML=state.trades.length?state.trades.map((t)=>'<tr><td>'+new Date(t.timestamp).toLocaleString()+'</td><td>'+t.symbol+'</td><td>'+t.side+'</td><td class="numeric">'+number(t.quantity,5)+'</td><td class="numeric">'+money(t.price,5)+'</td><td class="numeric '+((t.realizedPnl||0)>=0?"positive":"negative")+'">'+money(t.realizedPnl||0)+'</td></tr>').join(""):'<tr><td colspan="6" class="empty-cell">Your simulated trades will appear here.</td></tr>';
+  }
+
+  function renderPortfolio() {
+    $("portfolio-equity").textContent=money(totalEquity());
+    $("portfolio-cash").textContent=money(state.cash);
+    $("portfolio-invested").textContent=money(state.positions.reduce((s,p)=>s+positionValue(p),0));
+    $("portfolio-pnl").textContent=money(totalUnrealized()+totalRealized());
+    $("portfolio-body").innerHTML=state.positions.length?state.positions.map(positionRow).join(""):'<tr><td colspan="5" class="empty-cell">No open positions.</td></tr>';
+  }
+
+  function renderAll() {
+    renderOverview(); renderMarkets(); renderOrders(); renderHistory(); renderPortfolio();
+    if(state.activeView==="trade")renderTrade();
+    $("top-equity").textContent=money(totalEquity());
+  }
+
+  function reservedBuyCash() {
+    return state.orders.filter((o)=>o.status==="OPEN"&&o.side==="BUY").reduce((sum,o)=>sum+o.limitPrice*o.quantity*(1+FEE_RATE),0);
+  }
+  function reservedSellQuantity(symbol) {
+    return state.orders.filter((o)=>o.status==="OPEN"&&o.side==="SELL"&&o.symbol===symbol).reduce((sum,o)=>sum+o.quantity,0);
+  }
+
+  function executeMarketOrder(side, symbol, quantity) {
+    const asset=ASSETS.find((x)=>x.symbol===symbol), price=priceOf(symbol);
+    if(!asset || !Number.isFinite(quantity) || quantity<=0)throw new Error("Enter a valid quantity.");
+    const gross=price*quantity, fee=gross*FEE_RATE, total=gross+fee;
+    const existing=positionOf(symbol);
+    if(side==="BUY"){
+      if(total+reservedBuyCash()>state.cash)throw new Error("Insufficient available virtual cash after pending buy orders.");
+      state.cash-=total;
+      if(existing){const newQty=existing.quantity+quantity;existing.averagePrice=((existing.averagePrice*existing.quantity)+gross+fee)/newQty;existing.quantity=newQty;}
+      else state.positions.push({symbol,name:asset.name,quantity,averagePrice:(gross+fee)/quantity});
+    } else {
+      if(!existing || existing.quantity-reservedSellQuantity(symbol)+1e-10<quantity)throw new Error("Not enough available units after pending sell orders.");
+      const pnl=(price-existing.averagePrice)*quantity;
+      state.cash+=gross-fee;
+      existing.quantity-=quantity;
+      if(existing.quantity<1e-9)state.positions=state.positions.filter((p)=>p.symbol!==symbol);
+      state.trades.unshift({id:uid(),timestamp:Date.now(),symbol,side,quantity,price,fee,realizedPnl:pnl-fee});
+      persistSnapshot(); toast("Sell simulated. Realized P/L "+money(pnl-fee));
+      return;
+    }
+    state.trades.unshift({id:uid(),timestamp:Date.now(),symbol,side,quantity,price,fee,realizedPnl:0});
+    persistSnapshot(); toast(side+" order simulated successfully.");
+  }
+
+  function submitOrder(side) {
+    try {
+      const type=$("order-type").value, quantity=Number($("order-quantity").value);
+      if(!Number.isFinite(quantity)||quantity<=0)throw new Error("Quantity must be greater than zero.");
+      const symbol=state.selected;
+      if(type==="MARKET"){executeMarketOrder(side,symbol,quantity);}
+      else {
+        const limitPrice=Number($("limit-price").value);
+        if(!Number.isFinite(limitPrice)||limitPrice<=0)throw new Error("Enter a valid limit price.");
+        const order={id:uid(),timestamp:Date.now(),symbol,side,type,quantity,limitPrice,status:"OPEN"};
+        if(side==="BUY" && reservedBuyCash()+limitPrice*quantity*(1+FEE_RATE)>state.cash)throw new Error("Insufficient available virtual cash for this limit order.");
+        if(side==="SELL"){const p=positionOf(symbol);if(!p||p.quantity-reservedSellQuantity(symbol)<quantity)throw new Error("Not enough available units to reserve for this sell limit order.");}
+        state.orders.unshift(order);persistSnapshot();toast("Limit order placed in simulation.");
+      }
+      renderAll();
+    } catch(error){toast(error.message||"Order failed.","error");}
+  }
+
+  function matchLimitOrders() {
+    let changed=false;
+    state.orders.filter((o)=>o.status==="OPEN").forEach((o)=>{
+      const p=priceOf(o.symbol), crossed=o.side==="BUY"?p<=o.limitPrice:p>=o.limitPrice;
+      if(crossed){
+        try {o.status="FILLED";o.filledAt=Date.now();executeMarketOrder(o.side,o.symbol,o.quantity);changed=true;}
+        catch(e){o.status="REJECTED";o.reason=e.message;changed=true;}
+      }
+    });
+    if(changed)persistSnapshot();
+  }
+
+  function tick() {
+    if(state.marketPaused)return;
+    ASSETS.forEach((asset)=>{
+      const previous=priceOf(asset.symbol), next=Math.max(asset.price*.05,previous*(1+(Math.random()-.5)*asset.volatility));
+      state.prices[asset.symbol]=next;
+      const rows=state.candles[asset.symbol]||[];
+      const last=rows[rows.length-1], now=Date.now();
+      if(last && now-last.time<60000){last.close=next;last.high=Math.max(last.high,next);last.low=Math.min(last.low,next);}
+      else rows.push({time:now,open:previous,close:next,high:Math.max(previous,next),low:Math.min(previous,next),volume:Math.random()*100});
+      if(rows.length>180)rows.splice(0,rows.length-180);
+      state.candles[asset.symbol]=rows;
+    });
+    matchLimitOrders();
+    renderAll();
+    if(state.activeView==="trade")drawChart();
+  }
+
+  function toggleWatch(symbol) {
+    state.watchlist=state.watchlist.includes(symbol)?state.watchlist.filter((x)=>x!==symbol):state.watchlist.concat(symbol);
+    persistSnapshot();renderMarkets();renderWatchlist();
+  }
+
+  function selectAsset(symbol) {
+    if(!ASSETS.some((x)=>x.symbol===symbol))return;
+    state.selected=symbol;
+    $("order-quantity").value="";
+    if(state.activeView!=="trade")navigate("trade");else renderTrade();
+    persistSnapshot();
+  }
+
+  function bindEvents() {
+    document.addEventListener("click",(event)=>{
+      const view=event.target.closest("[data-view]");
+      if(view){navigate(view.dataset.view);return;}
+      const select=event.target.closest("[data-select]");
+      if(select){selectAsset(select.dataset.select);return;}
+      const watch=event.target.closest("[data-watch]");
+      if(watch){event.stopPropagation();toggleWatch(watch.dataset.watch);return;}
+      const trade=event.target.closest("[data-trade]");
+      if(trade){selectAsset(trade.dataset.trade);return;}
+      const cancel=event.target.closest("[data-cancel]");
+      if(cancel){const o=state.orders.find((x)=>x.id===cancel.dataset.cancel);if(o&&o.status==="OPEN"){o.status="CANCELLED";persistSnapshot();renderOrders();toast("Order cancelled.");}return;}
+    });
+    document.querySelectorAll("[data-category]").forEach((el)=>el.addEventListener("click",()=>{state.category=el.dataset.category;document.querySelectorAll("[data-category]").forEach((x)=>x.classList.toggle("active",x===el));renderMarkets();persistSnapshot();}));
+    $("market-search").addEventListener("input",renderMarkets);
+    $("order-type").addEventListener("change",()=>{$("limit-price-wrap").hidden=$("order-type").value!=="LIMIT";});
+    $("order-quantity").addEventListener("input",()=>{$("order-estimate").textContent=money(Number($("order-quantity").value||0)*priceOf(state.selected));});
+    $("buy-button").addEventListener("click",()=>submitOrder("BUY"));
+    $("sell-button").addEventListener("click",()=>submitOrder("SELL"));
+    document.querySelectorAll("[data-timeframe]").forEach((el)=>el.addEventListener("click",()=>{state.timeframe=el.dataset.timeframe;document.querySelectorAll("[data-timeframe]").forEach((x)=>x.classList.toggle("active",x===el));drawChart();persistSnapshot();}));
+    $("pause-market").addEventListener("click",()=>{state.marketPaused=!state.marketPaused;$("pause-market").textContent=state.marketPaused?"Resume simulation":"Pause simulation";});
+    $("reset-demo").addEventListener("click",async()=>{
+      if(!window.confirm("Reset all local demo funds, positions, orders and trade history? This cannot be undone."))return;
+      state.cash=STARTING_CASH;state.positions=[];state.orders=[];state.trades=[];state.watchlist=["BTCUSD","ETHUSD","SOLUSD","AAPL","EURUSD"];
+      ASSETS.forEach(seedCandles);await Promise.all(["settings","orders","positions","trades","watchlist","candles"].map(clearStore));await persistSnapshot();renderAll();toast("Demo account reset.");
+    });
+    window.addEventListener("resize",()=>{if(state.activeView==="trade")drawChart();});
+  }
+
+  async function boot() {
+    try {
+      state.db=await openDB();
+      await hydrate();
+      bindEvents();
+      $("loading-screen").hidden=true;
+      $("app-shell").hidden=false;
+      document.querySelectorAll("[data-timeframe]").forEach((x)=>x.classList.toggle("active",x.dataset.timeframe===state.timeframe));
+      document.querySelectorAll("[data-category]").forEach((x)=>x.classList.toggle("active",x.dataset.category===state.category));
+      renderAll();
+      state.tickTimer=setInterval(tick,2500);
+      setInterval(()=>persistSnapshot().catch(()=>{}),15000);
+      window.addEventListener("beforeunload",()=>{if(state.db)persistSnapshot();});
+      if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
+    } catch(error) {
+      $("loading-screen").innerHTML='<div class="load-card"><b>Local storage unavailable</b><p>'+escapeHtml(error.message)+'</p><p>Use a modern browser with IndexedDB enabled and open MEMEVERSE from HTTPS or localhost.</p></div>';
+    }
+  }
+
+  window.MEMEVERSE={navigate,selectAsset};
+  boot();
+})();
