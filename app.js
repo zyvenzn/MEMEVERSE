@@ -255,8 +255,8 @@
     if(side==="BUY"){
       if(total>state.cash)throw new Error("Insufficient virtual cash.");
       state.cash-=total;
-      if(existing){const newQty=existing.quantity+quantity;existing.averagePrice=((existing.averagePrice*existing.quantity)+gross)/newQty;existing.quantity=newQty;}
-      else state.positions.push({symbol,name:asset.name,quantity,averagePrice:price});
+      if(existing){const newQty=existing.quantity+quantity;existing.averagePrice=((existing.averagePrice*existing.quantity)+gross+fee)/newQty;existing.quantity=newQty;}
+      else state.positions.push({symbol,name:asset.name,quantity,averagePrice:(gross+fee)/quantity});
     } else {
       if(!existing || existing.quantity+1e-10<quantity)throw new Error("Not enough units in this demo position.");
       const pnl=(price-existing.averagePrice)*quantity;
@@ -371,6 +371,7 @@
       document.querySelectorAll("[data-category]").forEach((x)=>x.classList.toggle("active",x.dataset.category===state.category));
       renderAll();
       state.tickTimer=setInterval(tick,2500);
+      setInterval(()=>persistSnapshot().catch(()=>{}),15000);
       window.addEventListener("beforeunload",()=>{if(state.db)persistSnapshot();});
       if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
     } catch(error) {
