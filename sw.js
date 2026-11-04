@@ -1,4 +1,4 @@
-const CACHE_NAME = "memeverse-terminal-v1";
+const CACHE_NAME = "memeverse-terminal-v2";
 const CORE_ASSETS = ["./","./index.html","./style.css","./app.js","./manifest.webmanifest","./privacy.html","./assets/icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting()));
