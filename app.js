@@ -79,12 +79,16 @@
   }
 
   async function persistSnapshot() {
-    await put("settings",{id:"account",cash:state.cash,selected:state.selected,category:state.category,timeframe:state.timeframe,updatedAt:Date.now()});
-    await Promise.all(state.orders.map((x)=>put("orders",{...x,id:x.id})));
-    await Promise.all(state.positions.map((x)=>put("positions",{...x,id:x.symbol})));
-    await Promise.all(state.trades.slice(0,500).map((x)=>put("trades",{...x,id:x.id})));
-    await put("watchlist",{id:"symbols",symbols:state.watchlist});
-    await Promise.all(Object.keys(state.candles).map((symbol)=>put("candles",{id:symbol,rows:state.candles[symbol]})));
+    const names=["settings","orders","positions","trades","watchlist","candles"];
+    await Promise.all(names.map(clearStore));
+    await Promise.all([
+      put("settings",{id:"account",cash:state.cash,selected:state.selected,category:state.category,timeframe:state.timeframe,updatedAt:Date.now()}),
+      ...state.orders.map((x)=>put("orders",{...x,id:x.id})),
+      ...state.positions.map((x)=>put("positions",{...x,id:x.symbol})),
+      ...state.trades.slice(0,500).map((x)=>put("trades",{...x,id:x.id})),
+      put("watchlist",{id:"symbols",symbols:state.watchlist}),
+      ...Object.keys(state.candles).map((symbol)=>put("candles",{id:symbol,rows:state.candles[symbol]}))
+    ]);
   }
 
   async function hydrate() {
@@ -199,9 +203,18 @@
     ctx.strokeStyle="rgba(148,163,184,.13)"; ctx.lineWidth=1;
     for(let i=1;i<5;i++){const y=i*h/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
     if(rows.length<2)return;
-    const min=Math.min(...rows.map((x)=>x.low)),max=Math.max(...rows.map((x)=>x.high)),range=max-min||1;
-    const xStep=w/rows.length,body=Math.max(2,Math.min(9,xStep*.58));
-    rows.forEach((c,i)=>{
+    const minutes={"1m":1,"5m":5,"15m":15,"1h":60,"1d":1440}[state.timeframe]||1;
+    const grouped=[];
+    rows.forEach((c)=>{
+      const bucket=Math.floor(c.time/(minutes*60000));
+      const last=grouped[grouped.length-1];
+      if(last&&last.bucket===bucket){last.close=c.close;last.high=Math.max(last.high,c.high);last.low=Math.min(last.low,c.low);last.volume+=c.volume;}
+      else grouped.push({bucket,time:c.time,open:c.open,close:c.close,high:c.high,low:c.low,volume:c.volume});
+    });
+    const visible=grouped.slice(-120);
+    const min=Math.min(...visible.map((x)=>x.low)),max=Math.max(...visible.map((x)=>x.high)),range=max-min||1;
+    const xStep=w/visible.length,body=Math.max(2,Math.min(9,xStep*.58));
+    visible.forEach((c,i)=>{
       const x=i*xStep+xStep/2,yo=h-(c.open-min)/range*h,yc=h-(c.close-min)/range*h;
       const yh=h-(c.high-min)/range*h,yl=h-(c.low-min)/range*h;
       const up=c.close>=c.open;ctx.strokeStyle=up?"#4bd6a0":"#ff7185";ctx.fillStyle=ctx.strokeStyle;
