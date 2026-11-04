@@ -1,10 +1,13 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
-const dist = new URL("../dist/", import.meta.url);
-await rm(dist, { recursive: true, force: true });
-await mkdir(dist, { recursive: true });
-for (const file of ["index.html", "app.js", "style.css", "manifest.webmanifest", "sw.js"]) {
-  await cp(new URL(file, root), new URL(file, dist));
+const outputs = ["dist", "public"];
+for (const folder of outputs) {
+  const target = new URL("../" + folder + "/", import.meta.url);
+  await rm(target, { recursive: true, force: true });
+  await mkdir(target, { recursive: true });
+  for (const file of ["index.html", "app.js", "style.css", "manifest.webmanifest", "sw.js"]) {
+    await cp(new URL(file, root), new URL(file, target));
+  }
+  await cp(new URL("assets/", root), new URL("assets/", target), { recursive: true });
 }
-await cp(new URL("assets/", root), new URL("assets/", dist), { recursive: true });
-console.log("Prepared offline web bundle in dist/");
+console.log("Prepared Capacitor bundle in dist/ and Vercel static output in public/");
