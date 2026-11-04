@@ -79,16 +79,20 @@
   }
 
   async function persistSnapshot() {
-    const names=["settings","orders","positions","trades","watchlist","candles"];
-    await Promise.all(names.map(clearStore));
-    await Promise.all([
-      put("settings",{id:"account",cash:state.cash,selected:state.selected,category:state.category,timeframe:state.timeframe,updatedAt:Date.now()}),
-      ...state.orders.map((x)=>put("orders",{...x,id:x.id})),
-      ...state.positions.map((x)=>put("positions",{...x,id:x.symbol})),
-      ...state.trades.slice(0,500).map((x)=>put("trades",{...x,id:x.id})),
-      put("watchlist",{id:"symbols",symbols:state.watchlist}),
-      ...Object.keys(state.candles).map((symbol)=>put("candles",{id:symbol,rows:state.candles[symbol]}))
-    ]);
+    return new Promise((resolve,reject)=>{
+      const names=["settings","orders","positions","trades","watchlist","candles"];
+      const tx=state.db.transaction(names,"readwrite");
+      names.forEach((name)=>tx.objectStore(name).clear());
+      tx.objectStore("settings").put({id:"account",cash:state.cash,selected:state.selected,category:state.category,timeframe:state.timeframe,updatedAt:Date.now()});
+      state.orders.forEach((x)=>tx.objectStore("orders").put({...x,id:x.id}));
+      state.positions.forEach((x)=>tx.objectStore("positions").put({...x,id:x.symbol}));
+      state.trades.slice(0,500).forEach((x)=>tx.objectStore("trades").put({...x,id:x.id}));
+      tx.objectStore("watchlist").put({id:"symbols",symbols:state.watchlist});
+      Object.keys(state.candles).forEach((symbol)=>tx.objectStore("candles").put({id:symbol,rows:state.candles[symbol]}));
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error||new Error("Failed to save local trading state."));
+      tx.onabort=()=>reject(tx.error||new Error("Local trading save was aborted."));
+    });
   }
 
   async function hydrate() {
